@@ -22,12 +22,12 @@ class HistoryController extends Controller
         $appointments = Appointment::where('patient_id', $patient->id)
             ->with('dentist')
             ->orderBy('appointment_date', 'desc')
-            ->paginate(10);
+            ->paginate(config('app.pagination.appointments'));
 
         $treatments = TreatmentRecord::where('patient_id', $patient->id)
             ->with('dentist')
             ->orderBy('treatment_date', 'desc')
-            ->paginate(10);
+            ->paginate(config('app.pagination.treatment_history'));
 
         return Inertia::render('Patient/History', [
             'appointments' => $appointments,

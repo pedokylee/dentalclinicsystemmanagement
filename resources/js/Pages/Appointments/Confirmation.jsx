@@ -103,11 +103,36 @@ export default function BookingConfirmation({ appointment, patient }) {
                         <div className="bg-[#0D9488]/10 border border-[#0D9488]/30 rounded-lg p-4">
                             <p className="text-sm text-[#E2FAF7] font-medium mb-3">Please Remember:</p>
                             <ul className="space-y-2 text-sm text-[#7ABFB9]">
-                                <li>✓ Arrive 10-15 minutes early to complete check-in</li>
-                                <li>✓ Bring your insurance card if applicable</li>
-                                <li>✓ Bring a valid ID</li>
-                                <li>✓ Call us at (555) 123-4567 if you need to reschedule</li>
-                                <li>✓ Cancellations must be made 24 hours in advance</li>
+                                <li className="flex gap-3 items-start">
+                                    <svg className="w-5 h-5 text-[#0D9488] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                    </svg>
+                                    <span>Arrive 10-15 minutes early to complete check-in</span>
+                                </li>
+                                <li className="flex gap-3 items-start">
+                                    <svg className="w-5 h-5 text-[#0D9488] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                    </svg>
+                                    <span>Bring your insurance card if applicable</span>
+                                </li>
+                                <li className="flex gap-3 items-start">
+                                    <svg className="w-5 h-5 text-[#0D9488] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                    </svg>
+                                    <span>Bring a valid ID</span>
+                                </li>
+                                <li className="flex gap-3 items-start">
+                                    <svg className="w-5 h-5 text-[#0D9488] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                    </svg>
+                                    <span>Call us at (555) 123-4567 if you need to reschedule</span>
+                                </li>
+                                <li className="flex gap-3 items-start">
+                                    <svg className="w-5 h-5 text-[#0D9488] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                    </svg>
+                                    <span>Cancellations must be made 24 hours in advance</span>
+                                </li>
                             </ul>
                         </div>
                     </div>

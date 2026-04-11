@@ -15,7 +15,7 @@ class AuditLogController extends Controller
     {
         $logs = AuditLog::with('user')
             ->orderBy('created_at', 'desc')
-            ->paginate(20)
+            ->paginate(config('app.pagination.audit_logs'))
             ->withQueryString();
 
         return Inertia::render('Admin/AuditLog', ['logs' => $logs]);

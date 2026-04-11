@@ -19,7 +19,7 @@ class TreatmentHistoryController extends Controller
         $records = TreatmentRecord::where('patient_id', $patient->id)
             ->with('dentist.user')
             ->orderBy('visit_date', 'desc')
-            ->paginate(10)
+            ->paginate(config('app.pagination.treatment_history'))
             ->withQueryString();
 
         return Inertia::render('Patient/History/Index', ['records' => $records]);
@@ -33,7 +33,7 @@ class TreatmentHistoryController extends Controller
         $record = TreatmentRecord::findOrFail($id);
 
         if ($record->patient_id !== $patient->id) {
-            abort(403, 'Unauthorized access.');
+            abort(403, 'Unauthorized access');
         }
 
         AuditLog::log('exported', 'treatment_records', "Patient exported treatment record ID: {$id}");

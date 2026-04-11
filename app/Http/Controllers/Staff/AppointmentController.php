@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Mail;
+use App\Helpers\ClinicHelper;
 
 class AppointmentController extends Controller
 {
@@ -23,7 +24,7 @@ class AppointmentController extends Controller
     {
         $appointments = Appointment::with('patient', 'dentist.user')
             ->orderBy('appointment_date', 'desc')
-            ->paginate(20)
+            ->paginate(config('app.pagination.appointments'))
             ->withQueryString();
 
         return Inertia::render('Staff/Appointments/Index', ['appointments' => $appointments]);
@@ -34,13 +35,8 @@ class AppointmentController extends Controller
         $patients = Patient::all(['id', 'first_name', 'last_name']);
         $dentists = Dentist::with('user:id,name')->get(['id', 'user_id']);
 
-        // Generate available time slots
-        $timeSlots = [];
-        for ($hour = 9; $hour <= 17; $hour++) {
-            for ($min = 0; $min < 60; $min += 30) {
-                $timeSlots[] = sprintf('%02d:%02d', $hour, $min);
-            }
-        }
+        // Generate available time slots using clinic config
+        $timeSlots = ClinicHelper::generateTimeSlots();
 
         return Inertia::render('Staff/Appointments/Create', [
             'patients' => $patients,
@@ -114,12 +110,9 @@ class AppointmentController extends Controller
     {
         $patients = Patient::all(['id', 'first_name', 'last_name']);
         $dentists = Dentist::with('user:id,name')->get(['id', 'user_id']);
-        $timeSlots = [];
-        for ($hour = 9; $hour <= 17; $hour++) {
-            for ($min = 0; $min < 60; $min += 30) {
-                $timeSlots[] = sprintf('%02d:%02d', $hour, $min);
-            }
-        }
+        
+        // Generate available time slots using clinic config
+        $timeSlots = ClinicHelper::generateTimeSlots();
 
         return Inertia::render('Staff/Appointments/Edit', [
             'appointment' => $appointment,

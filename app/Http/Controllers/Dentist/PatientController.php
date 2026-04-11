@@ -15,7 +15,7 @@ class PatientController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         $patients = Patient::whereIn('id', function ($query) use ($dentist) {
             $query->select('patient_id')
@@ -23,7 +23,7 @@ class PatientController extends Controller
                 ->where('dentist_id', $dentist->id)
                 ->distinct();
         })
-        ->paginate(15)
+        ->paginate(config('app.pagination.patients'))
         ->withQueryString();
 
         return Inertia::render('Dentist/Patients/Index', ['patients' => $patients]);
@@ -32,7 +32,7 @@ class PatientController extends Controller
     public function show(Patient $patient)
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         // Verify this patient is assigned to the dentist
         $hasAppointment = Appointment::where('patient_id', $patient->id)
@@ -40,7 +40,7 @@ class PatientController extends Controller
             ->exists();
 
         if (!$hasAppointment) {
-            abort(403, 'Unauthorized access to this patient.');
+            abort(403, 'Unauthorized access to this patient');
         }
 
         $treatmentHistory = $patient->treatmentRecords()
@@ -57,7 +57,7 @@ class PatientController extends Controller
     public function exportPdf()
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         $patients = Patient::whereIn('id', function ($query) use ($dentist) {
             $query->select('patient_id')
@@ -73,7 +73,7 @@ class PatientController extends Controller
     public function exportExcel()
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         return Excel::download(
             new DentistPatientsExport($dentist->id),

@@ -8,6 +8,7 @@ use App\Exports\UsersExport;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -22,10 +23,10 @@ class UserController extends Controller
             $query->where('role', $role);
         }
 
-        $users = $query->paginate(15)->withQueryString();
+        $users = $query->get();
 
         return Inertia::render('Admin/Users/Index', [
-            'users' => $users,
+            'users' => ['data' => $users],
             'filters' => ['role' => $role],
         ]);
     }
@@ -46,12 +47,13 @@ class UserController extends Controller
 
         $user = User::create([
             ...$validated,
-            'password' => bcrypt($validated['password']),
+            'password' => Hash::make($validated['password']),
+            'email_verified_at' => now(),
         ]);
 
         AuditLog::log('created', 'users', "Created user: {$user->name}");
 
-        return redirect('/admin/users')->with('success', 'User created successfully.');
+        return redirect("/admin/users?role={$validated['role']}")->with('success', "User {$user->name} created successfully!");
     }
 
     public function edit(User $user)
@@ -61,10 +63,26 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        // Check if this is just a status update (only 'active' field)
+        if ($request->has('active') && count($request->all()) === 1) {
+            // Status-only update
+            $validated = $request->validate([
+                'active' => 'required|boolean',
+            ]);
+            
+            $user->update($validated);
+            
+            AuditLog::log('updated', 'users', "Updated user status: {$user->name}");
+            
+            return response()->json(['success' => true, 'message' => 'User status updated successfully.']);
+        }
+        
+        // Full user update
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,dentist,staff,patient',
+            'active' => 'nullable|boolean',
         ]);
 
         $user->update($validated);

@@ -11,9 +11,9 @@ use App\Exports\PatientAppointmentsExport;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Helpers\ClinicHelper;
 
 class AppointmentController extends Controller
 {
@@ -26,7 +26,7 @@ class AppointmentController extends Controller
         $appointments = Appointment::where('patient_id', $patient->id)
             ->with('dentist.user')
             ->orderBy('appointment_date', 'desc')
-            ->paginate(10)
+            ->paginate(config('app.pagination.appointments'))
             ->withQueryString();
 
         return Inertia::render('Patient/Appointments/Index', ['appointments' => $appointments]);
@@ -38,11 +38,16 @@ class AppointmentController extends Controller
         $patient = $user->patient;
 
         if ($appointment->patient_id !== $patient->id) {
-            abort(403, 'Unauthorized.');
+            abort(403, 'Unauthorized');
         }
 
-        if ($appointment->appointment_date <= now()) {
-            abort(403, 'Cannot cancel past appointments.');
+        $appointmentDateTime = \Carbon\Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $appointment->appointment_date->format('Y-m-d') . ' ' . $appointment->appointment_time
+        );
+        
+        if ($appointmentDateTime <= now()) {
+            abort(403, 'Cannot cancel past appointments');
         }
 
         $appointment->update(['status' => 'cancelled']);
@@ -54,14 +59,16 @@ class AppointmentController extends Controller
     // Public booking routes (no auth required)
     public function publicBook()
     {
+        // Redirect to login if not authenticated
+        if (!auth()->check()) {
+            session(['url.intended' => route('appointments.book')]);
+            return redirect('/login');
+        }
+
         $dentists = Dentist::with('user')->get();
         
-        // Generate time slots (9 AM to 5 PM, 30-minute intervals)
-        $timeSlots = [];
-        for ($hour = 9; $hour < 17; $hour++) {
-            $timeSlots[] = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
-            $timeSlots[] = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':30';
-        }
+        // Generate time slots using clinic config
+        $timeSlots = ClinicHelper::generateTimeSlots();
 
         return Inertia::render('Appointments/BookPublic', [
             'dentists' => $dentists,
@@ -72,15 +79,25 @@ class AppointmentController extends Controller
 
     public function getDentists()
     {
-        return Dentist::with('user')->get([
+        // Redirect to login if not authenticated
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return response()->json(Dentist::with('user')->get([
             'id',
             'user_id',
             'specialization',
-        ]);
+        ]));
     }
 
     public function getAvailableTimes(Request $request)
     {
+        // Redirect to login if not authenticated
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $date = $request->query('date');
         $dentistId = $request->query('dentist_id');
 
@@ -95,16 +112,11 @@ class AppointmentController extends Controller
             ->pluck('appointment_time')
             ->toArray();
 
-        // Generate available time slots
-        $timeSlots = [];
-        for ($hour = 9; $hour < 17; $hour++) {
-            foreach (['00', '30'] as $minute) {
-                $time = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':' . $minute;
-                if (!in_array($time, $bookedTimes)) {
-                    $timeSlots[] = $time;
-                }
-            }
-        }
+        // Generate available time slots using clinic config
+        $allTimeSlots = ClinicHelper::generateTimeSlots();
+        $timeSlots = array_filter($allTimeSlots, function($time) use ($bookedTimes) {
+            return !in_array($time, $bookedTimes);
+        });
 
         return response()->json([
             'available_times' => $timeSlots,
@@ -114,25 +126,33 @@ class AppointmentController extends Controller
 
     public function storePublic(Request $request)
     {
-        // Validate input
-        $validated = Validator::make($request->all(), [
+        // Validate all incoming form data
+        $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
             'appointment_date' => 'required|date|after:today',
-            'appointment_time' => 'required|regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/',
+            'appointment_time' => 'required|date_format:H:i',
             'dentist_id' => 'required|exists:dentists,id',
             'type' => 'required|in:checkup,cleaning,filling,extraction,root_canal,crown,whitening',
             'notes' => 'nullable|string|max:500',
-        ])->validate();
+        ]);
 
-        // Get or create patient linked to logged-in user
+        // Get the authenticated user making the appointment request
         $user = auth()->user();
-        $patient = Patient::where('email', $validated['email'])->first();
+        
+        // Try to get existing patient record in this order:
+        // 1. Use the authenticated user's linked patient (if they have one)
+        // 2. Search for patient by email (for return customers)
+        // 3. Create new patient if none exists
+        $patient = $user->patient ?? Patient::where('email', $validated['email'])->first();
         
         if (!$patient) {
+            // Create new patient record linked to the authenticated user
+            // This ensures the patient can later log in and view their appointments
             $patient = Patient::create([
+                'user_id' => $user->id,
                 'first_name' => $validated['first_name'],
                 'last_name' => $validated['last_name'],
                 'email' => $validated['email'],
@@ -142,24 +162,26 @@ class AppointmentController extends Controller
                 'address' => null,
             ]);
         } else {
-            // Update patient info if provided
+            // Update existing patient's phone in case it changed
             $patient->update([
                 'phone' => $validated['phone'],
             ]);
         }
 
-        // Check for conflicts
+        // Verify the requested time slot is still available
+        // Check against other confirmed/scheduled appointments to prevent double-booking
         $existingAppointment = Appointment::where('dentist_id', $validated['dentist_id'])
             ->whereDate('appointment_date', $validated['appointment_date'])
             ->where('appointment_time', $validated['appointment_time'])
-            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'cancelled')  // Ignore cancelled appointments
             ->first();
 
         if ($existingAppointment) {
+            // Time slot was taken by another booking, reject this request
             return back()->withErrors(['appointment_time' => 'This time slot is no longer available. Please choose another.']);
         }
 
-        // Create the appointment
+        // Create the appointment record with initial status
         $appointment = Appointment::create([
             'patient_id' => $patient->id,
             'dentist_id' => $validated['dentist_id'],
@@ -171,9 +193,10 @@ class AppointmentController extends Controller
             'confirmation_sent' => false,
         ]);
 
-        // Log the action
+        // Log this appointment creation for audit trail
         AuditLog::log('created', 'appointments', "Appointment booking created by {$user->email}");
 
+        // Redirect to confirmation page with success message
         return redirect('/appointments/confirmation/' . $appointment->id)->with('success', 'Appointment booked successfully!');
     }
 

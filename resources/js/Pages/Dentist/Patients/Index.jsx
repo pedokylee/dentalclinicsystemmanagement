@@ -1,4 +1,5 @@
 import DentistLayout from '@/Layouts/DentistLayout'
+import { Link } from '@inertiajs/react'
 
 export default function PatientsIndex({ patients }) {
     const handleExportPdf = () => {
@@ -54,9 +55,9 @@ export default function PatientsIndex({ patients }) {
                                     )}
                                 </td>
                                 <td className="px-6 py-3">
-                                    <a href={`/dentist/patients/${patient.id}`} className="text-[#0D9488] hover:text-[#14B8A6]">
+                                    <Link href={`/dentist/patients/${patient.id}`} className="text-[#0D9488] hover:text-[#14B8A6]">
                                         View
-                                    </a>
+                                    </Link>
                                 </td>
                             </tr>
                         ))}

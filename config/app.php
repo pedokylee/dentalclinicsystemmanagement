@@ -123,4 +123,23 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Centralized pagination settings for consistent pagination across the app.
+    | These values are used to ensure consistent data display sizes.
+    |
+    */
+
+    'pagination' => [
+        'default' => 15,          // Default pagination size
+        'appointments' => 10,     // Appointments list
+        'patients' => 15,         // Patient listings
+        'notifications' => 20,    // Notifications list
+        'audit_logs' => 20,       // Audit logs list
+        'treatment_history' => 10, // Treatment history
+    ],
+
 ];

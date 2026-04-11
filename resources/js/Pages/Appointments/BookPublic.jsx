@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react'
+import { useForm, usePage, router } from '@inertiajs/react'
 import { useState, useEffect } from 'react'
 import { Link } from '@inertiajs/react'
 import { CalendarIcon, ClockIcon, UserIcon, MailIcon, PhoneIcon, AlertCircleIcon, CheckCircleIcon } from 'lucide-react'
@@ -23,9 +23,17 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
         // Fetch available time slots when date or dentist changes
         if (data.appointment_date && data.dentist_id) {
             fetch(`/appointments/available-times?date=${data.appointment_date}&dentist_id=${data.dentist_id}`)
-                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 401) {
+                        router.visit('/login')
+                        return
+                    }
+                    return res.json()
+                })
                 .then(result => {
-                    setAvailableSlots(result.available_times || timeSlots)
+                    if (result && result.available_times) {
+                        setAvailableSlots(result.available_times)
+                    }
                 })
                 .catch(err => console.error('Error fetching times:', err))
         }

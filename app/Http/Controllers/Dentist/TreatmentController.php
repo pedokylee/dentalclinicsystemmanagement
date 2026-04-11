@@ -14,7 +14,7 @@ class TreatmentController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         $patients = Patient::whereIn('id', function ($query) use ($dentist) {
             $query->select('patient_id')
@@ -31,14 +31,15 @@ class TreatmentController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'visit_date' => 'required|date',
-            'procedures' => 'array',
+            'procedures' => 'nullable|array',
+            'procedures.*' => 'in:extraction,filling,crown,root_canal,cleaning,whitening,root_planing',
             'notes' => 'nullable|string',
             'prescription' => 'nullable|string',
             'tooth_data' => 'nullable|json',
         ]);
 
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         $record = TreatmentRecord::create([
             ...$validated,
@@ -53,7 +54,8 @@ class TreatmentController extends Controller
     public function edit(TreatmentRecord $treatment)
     {
         $user = auth()->user();
-        if ($treatment->dentist_id !== $user->dentist->id) {
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
+        if ($treatment->dentist_id !== $dentist->id) {
             abort(403);
         }
 
@@ -63,13 +65,15 @@ class TreatmentController extends Controller
     public function update(Request $request, TreatmentRecord $treatment)
     {
         $user = auth()->user();
-        if ($treatment->dentist_id !== $user->dentist->id) {
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
+        if ($treatment->dentist_id !== $dentist->id) {
             abort(403);
         }
 
         $validated = $request->validate([
             'visit_date' => 'required|date',
-            'procedures' => 'array',
+            'procedures' => 'nullable|array',
+            'procedures.*' => 'in:extraction,filling,crown,root_canal,cleaning,whitening,root_planing',
             'notes' => 'nullable|string',
             'prescription' => 'nullable|string',
             'tooth_data' => 'nullable|json',

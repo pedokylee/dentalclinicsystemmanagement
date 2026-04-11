@@ -18,8 +18,14 @@ class Patient extends Model
         'gender',
         'contact_number',
         'address',
+        'street_address',
+        'city',
+        'state',
+        'zip_code',
         'medical_alerts',
         'emergency_contact',
+        'emergency_contact_name',
+        'emergency_contact_phone',
     ];
 
     protected $casts = [

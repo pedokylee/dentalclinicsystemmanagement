@@ -33,6 +33,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Track last login
+        auth()->user()->update(['last_login' => now()]);
+
         // Role-based redirect
         $user = auth()->user();
         $redirect = match ($user->role) {

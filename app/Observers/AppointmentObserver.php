@@ -14,8 +14,12 @@ class AppointmentObserver
     public function created(Appointment $appointment): void
     {
         // Dispatch job to send reminder 24 hours before appointment
-        $reminderTime = $appointment->appointment_date->subDay()->setTime(9, 0);
-        SendAppointmentReminderJob::dispatch($appointment)->delay($reminderTime);
+        // Use null-safe operator in case appointment_date is null
+        $reminderTime = $appointment->appointment_date?->subDay()->setTime(9, 0);
+        
+        if ($reminderTime) {
+            SendAppointmentReminderJob::dispatch($appointment)->delay($reminderTime);
+        }
     }
 
     /**

@@ -17,7 +17,7 @@ class ProfileController extends Controller
         $patient = Patient::where('user_id', $user->id)->first();
 
         if (!$patient) {
-            abort(404, 'Patient profile not found.');
+            abort(404, 'Patient profile not found');
         }
 
         $pendingRequests = ProfileChangeRequest::where('patient_id', $patient->id)
@@ -38,7 +38,7 @@ class ProfileController extends Controller
         $patient = Patient::where('user_id', $user->id)->first();
 
         if (!$patient) {
-            abort(404, 'Patient profile not found.');
+            abort(404, 'Patient profile not found');
         }
 
         $validated = $request->validate([
@@ -62,7 +62,7 @@ class ProfileController extends Controller
         $patient = Patient::where('user_id', $user->id)->first();
 
         if (!$patient) {
-            abort(404, 'Patient profile not found.');
+            abort(404, 'Patient profile not found');
         }
 
         $field = $request->input('field');

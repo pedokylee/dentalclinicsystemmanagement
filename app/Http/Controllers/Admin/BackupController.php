@@ -18,6 +18,11 @@ class BackupController extends Controller
         if (is_dir($backupDir)) {
             $files = array_diff(scandir($backupDir), ['.', '..']);
             foreach ($files as $file) {
+                // Only list files matching backup naming pattern
+                if (!preg_match('/^backup_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.sqlite$/', $file)) {
+                    continue;
+                }
+                
                 $filePath = "{$backupDir}/{$file}";
                 if (is_file($filePath)) {
                     $backups[] = [

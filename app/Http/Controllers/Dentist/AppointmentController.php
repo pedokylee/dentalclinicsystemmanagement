@@ -16,7 +16,7 @@ class AppointmentController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         $appointments = Appointment::where('dentist_id', $dentist->id)
             ->with('patient')
@@ -37,7 +37,7 @@ class AppointmentController extends Controller
     public function destroy(Appointment $appointment)
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         // Verify this appointment belongs to the dentist
         if ($appointment->dentist_id !== $dentist->id) {

@@ -13,7 +13,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $dentist = $user->dentist;
+        $dentist = $user->dentist ?? abort(403, 'Dentist profile not configured.');
 
         $todaySchedule = Appointment::where('dentist_id', $dentist->id)
             ->where('appointment_date', Carbon::today())
@@ -32,8 +32,9 @@ class DashboardController extends Controller
             ->count();
 
         $myPatientsCount = Appointment::where('dentist_id', $dentist->id)
-            ->distinct('patient_id')
-            ->count('patient_id');
+            ->pluck('patient_id')
+            ->unique()
+            ->count();
 
         return Inertia::render('Dentist/Dashboard', [
             'todaySchedule' => $todaySchedule,

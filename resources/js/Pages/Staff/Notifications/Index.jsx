@@ -1,4 +1,5 @@
 import StaffLayout from '@/Layouts/StaffLayout'
+import { Link } from '@inertiajs/react'
 
 export default function NotificationsIndex({ notifications, unreadCount }) {
     const { data, links } = notifications
@@ -100,20 +101,26 @@ export default function NotificationsIndex({ notifications, unreadCount }) {
             {/* Pagination */}
             {links && links.length > 1 && (
                 <div className="flex justify-center gap-1 mt-6">
-                    {links.map((link) => (
-                        <a
-                            key={link.label}
-                            href={link.url || '#'}
-                            className={`px-3 py-2 rounded text-sm ${
-                                link.active
-                                    ? 'bg-[#0D9488] text-white'
-                                    : link.url
-                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
+                    {links.map((link) => 
+                        link.url ? (
+                            <Link
+                                key={link.label}
+                                href={link.url}
+                                className={`px-3 py-2 rounded text-sm ${
+                                    link.active
+                                        ? 'bg-[#0D9488] text-white'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ) : (
+                            <span
+                                key={link.label}
+                                className="px-3 py-2 rounded text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        )
+                    )}
                 </div>
             )}
         </div>

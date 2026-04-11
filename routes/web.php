@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Dentist\DashboardController as DentistDashboardController;
+use App\Http\Controllers\Dentist\ProfileController as DentistProfileController;
 use App\Http\Controllers\Dentist\PatientController as DentistPatientController;
 use App\Http\Controllers\Dentist\TreatmentController;
 use App\Http\Controllers\Dentist\AppointmentController as DentistAppointmentController;
@@ -29,11 +31,11 @@ Route::get('/', function () {
 });
 
 // Public Appointment Booking
-Route::get('/appointments/book', [PatientAppointmentController::class, 'publicBook'])->middleware('auth')->name('appointments.book');
-Route::get('/appointments/available-dentists', [PatientAppointmentController::class, 'getDentists'])->middleware('auth')->name('appointments.dentists');
-Route::get('/appointments/available-times', [PatientAppointmentController::class, 'getAvailableTimes'])->middleware('auth')->name('appointments.times');
-Route::post('/appointments/store-public', [PatientAppointmentController::class, 'storePublic'])->middleware('auth')->name('appointments.store-public');
-Route::get('/appointments/confirmation/{appointment}', [PatientAppointmentController::class, 'confirmation'])->middleware('auth')->name('appointments.confirmation');
+Route::get('/appointments/book', [PatientAppointmentController::class, 'publicBook'])->name('appointments.book');
+Route::get('/appointments/available-dentists', [PatientAppointmentController::class, 'getDentists'])->name('appointments.dentists');
+Route::get('/appointments/available-times', [PatientAppointmentController::class, 'getAvailableTimes'])->name('appointments.times');
+Route::post('/appointments/store-public', [PatientAppointmentController::class, 'storePublic'])->name('appointments.store-public');
+Route::get('/appointments/confirmation/{appointment}', [PatientAppointmentController::class, 'confirmation'])->name('appointments.confirmation');
 
 // Admin Routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -61,6 +63,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::resource('/backup', BackupController::class);
     Route::get('/config', fn() => Inertia::render('Admin/Config'))->name('admin.config');
     Route::post('/config', fn() => response()->json(['message' => 'Config saved']))->name('admin.config.save');
+    
+    // Appointments
+    Route::get('/appointments/create', [AdminAppointmentController::class, 'create'])->name('admin.appointments.create');
+    Route::post('/appointments', [AdminAppointmentController::class, 'store'])->name('admin.appointments.store');
 });
 
 // Dentist Routes
@@ -69,8 +75,8 @@ Route::middleware(['auth', 'role:dentist'])->prefix('dentist')->group(function (
     
     // Profile
     Route::get('/profile', fn() => Inertia::render('Dentist/Profile', ['user' => auth()->user(), 'dentist' => auth()->user()->dentist]))->name('dentist.profile');
-    Route::patch('/profile', fn() => back()->with('success', 'Profile updated'))->name('dentist.profile.update');
-    Route::patch('/profile/password', fn() => back()->with('success', 'Password updated'))->name('dentist.profile.password');
+    Route::patch('/profile', [DentistProfileController::class, 'update'])->name('dentist.profile.update');
+    Route::patch('/profile/password', [DentistProfileController::class, 'updatePassword'])->name('dentist.profile.password');
     
     Route::resource('/patients', DentistPatientController::class, ['only' => ['index', 'show']]);
     Route::get('/patients/export/pdf', [DentistPatientController::class, 'exportPdf'])->name('dentist.patients.export-pdf');

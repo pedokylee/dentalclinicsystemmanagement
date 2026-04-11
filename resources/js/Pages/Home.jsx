@@ -182,7 +182,7 @@ export default function Home() {
                         <ul className="space-y-2">
                             <li><a href="#" className="text-[#7ABFB9] hover:text-[#0D9488] transition-colors text-sm">About Us</a></li>
                             <li><a href="#" className="text-[#7ABFB9] hover:text-[#0D9488] transition-colors text-sm">Services</a></li>
-                            <li><a href="#" className="text-[#7ABFB9] hover:text-[#0D9488] transition-colors text-sm">Book Appointment</a></li>
+                            <li><Link href="/appointments/book" className="text-[#7ABFB9] hover:text-[#0D9488] transition-colors text-sm">Book Appointment</Link></li>
                         </ul>
                     </div>
                     <div>
