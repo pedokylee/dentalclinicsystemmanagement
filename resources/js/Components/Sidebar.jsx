@@ -22,6 +22,7 @@ const NAV_ITEMS = {
         { label: 'Audit Log', href: '/admin/audit-log', icon: ShieldCheck },
         { label: 'Backup & Restore', href: '/admin/backup', icon: Database },
         { label: 'System Config', href: '/admin/config', icon: Settings },
+        { label: 'User Settings', href: '/admin/profile', icon: UserRound },
     ],
     dentist: [
         { label: 'Dashboard', href: '/dentist/dashboard', icon: LayoutDashboard },
@@ -29,6 +30,7 @@ const NAV_ITEMS = {
         { label: 'Treatment Record', href: '/dentist/treatment/create', icon: ClipboardList },
         { label: 'My Appointments', href: '/dentist/appointments', icon: CalendarDays },
         { label: 'Notifications', href: '/dentist/notifications', icon: Bell },
+        { label: 'User Settings', href: '/dentist/profile', icon: Settings },
     ],
     staff: [
         { label: 'Dashboard', href: '/staff/dashboard', icon: LayoutDashboard },
@@ -39,10 +41,11 @@ const NAV_ITEMS = {
         { label: 'Walk-in Check-in', href: '/staff/checkin', icon: Activity },
         { label: 'Reports', href: '/staff/reports', icon: FileBarChart2 },
         { label: 'Notifications', href: '/staff/notifications', icon: Bell },
+        { label: 'User Settings', href: '/staff/profile', icon: Settings },
     ],
     patient: [
         { label: 'Dashboard', href: '/patient/dashboard', icon: LayoutDashboard },
-        { label: 'My Profile', href: '/patient/profile', icon: UserRound },
+        { label: 'Profile & Settings', href: '/patient/profile', icon: Settings },
         { label: 'My Appointments', href: '/patient/appointments', icon: CalendarDays },
         { label: 'Treatment History', href: '/patient/history', icon: ClipboardList },
         { label: 'Notifications', href: '/patient/notifications', icon: Bell },

@@ -2,7 +2,19 @@ import PatientLayout from '@/Layouts/PatientLayout'
 import { useForm } from '@inertiajs/react'
 import { useMemo, useState } from 'react'
 
-export default function PatientProfile({ patient, pendingRequests }) {
+const preferenceRows = [
+    ['in_app_notifications', 'In-app notifications'],
+    ['email_notifications', 'Email notifications'],
+    ['appointment_updates', 'Appointment updates'],
+    ['reminder_notifications', 'Reminder notifications'],
+]
+
+const uiRows = [
+    ['compact_tables', 'Compact tables'],
+    ['show_timestamps_24h', '24-hour timestamps'],
+]
+
+export default function PatientProfile({ patient, pendingRequests, settings }) {
     const [activeTab, setActiveTab] = useState('profile')
     const { data, setData, patch, post, processing, errors } = useForm({
         first_name: patient?.first_name ?? '',
@@ -16,6 +28,10 @@ export default function PatientProfile({ patient, pendingRequests }) {
         current_password: '',
         new_password: '',
         new_password_confirmation: '',
+    })
+    const preferencesForm = useForm({
+        notification_preferences: settings?.notification_preferences ?? {},
+        ui_preferences: settings?.ui_preferences ?? {},
     })
 
     const pendingByField = useMemo(() => {
@@ -40,6 +56,7 @@ export default function PatientProfile({ patient, pendingRequests }) {
                 {[
                     ['profile', 'Profile'],
                     ['security', 'Security'],
+                    ['preferences', 'Preferences'],
                     ['requests', 'Requests'],
                 ].map(([key, label]) => (
                     <button key={key} className={`dcms-tab ${activeTab === key ? 'dcms-tab-active' : 'dcms-tab-idle'}`} onClick={() => setActiveTab(key)}>
@@ -145,6 +162,62 @@ export default function PatientProfile({ patient, pendingRequests }) {
                         <div className="flex justify-end">
                             <button className="dcms-btn-primary" onClick={() => patch('/patient/profile/password')} disabled={processing}>
                                 {processing ? 'Updating...' : 'Update Password'}
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {activeTab === 'preferences' && (
+                <section className="dcms-card">
+                    <div className="dcms-card-body grid gap-6 md:grid-cols-2">
+                        <div className="space-y-4">
+                            <h2 className="text-xl">Notification Preferences</h2>
+                            {preferenceRows.map(([field, label]) => (
+                                <label key={field} className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--dcms-border)] px-4 py-3">
+                                    <span className="text-sm font-medium text-[var(--dcms-text)]">{label}</span>
+                                    <input
+                                        type="checkbox"
+                                        checked={preferencesForm.data.notification_preferences[field]}
+                                        onChange={(event) =>
+                                            preferencesForm.setData('notification_preferences', {
+                                                ...preferencesForm.data.notification_preferences,
+                                                [field]: event.target.checked,
+                                            })
+                                        }
+                                        className="h-4 w-4 accent-[var(--dcms-primary)]"
+                                    />
+                                </label>
+                            ))}
+                        </div>
+
+                        <div className="space-y-4">
+                            <h2 className="text-xl">Display Preferences</h2>
+                            {uiRows.map(([field, label]) => (
+                                <label key={field} className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--dcms-border)] px-4 py-3">
+                                    <span className="text-sm font-medium text-[var(--dcms-text)]">{label}</span>
+                                    <input
+                                        type="checkbox"
+                                        checked={preferencesForm.data.ui_preferences[field]}
+                                        onChange={(event) =>
+                                            preferencesForm.setData('ui_preferences', {
+                                                ...preferencesForm.data.ui_preferences,
+                                                [field]: event.target.checked,
+                                            })
+                                        }
+                                        className="h-4 w-4 accent-[var(--dcms-primary)]"
+                                    />
+                                </label>
+                            ))}
+                        </div>
+
+                        <div className="md:col-span-2 flex justify-end">
+                            <button
+                                className="dcms-btn-primary"
+                                onClick={() => preferencesForm.patch('/patient/profile/preferences', { preserveScroll: true })}
+                                disabled={preferencesForm.processing}
+                            >
+                                {preferencesForm.processing ? 'Saving...' : 'Save Preferences'}
                             </button>
                         </div>
                     </div>

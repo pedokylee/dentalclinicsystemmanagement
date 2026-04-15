@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LandingInquiryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\AuditLogController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Dentist\TreatmentController;
 use App\Http\Controllers\Dentist\AppointmentController as DentistAppointmentController;
 use App\Http\Controllers\Dentist\NotificationController as DentistNotificationController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\ProfileController as StaffProfileController;
 use App\Http\Controllers\Staff\PatientController as StaffPatientController;
 use App\Http\Controllers\Staff\PatientInquiryController as StaffPatientInquiryController;
 use App\Http\Controllers\Staff\AppointmentController as StaffAppointmentController;
@@ -66,9 +68,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     
     // Profile
-    Route::get('/profile', fn() => Inertia::render('Admin/Profile', ['user' => auth()->user()]))->name('admin.profile');
-    Route::patch('/profile', fn() => back()->with('success', 'Profile updated'))->name('admin.profile.update');
-    Route::patch('/profile/password', fn() => back()->with('success', 'Password updated'))->name('admin.profile.password');
+    Route::get('/profile', [AdminProfileController::class, 'show'])->name('admin.profile');
+    Route::patch('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+    Route::patch('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('admin.profile.password');
+    Route::patch('/profile/preferences', [AdminProfileController::class, 'updatePreferences'])->name('admin.profile.preferences');
     
     // User Management
     Route::resource('/users', AdminUserController::class);
@@ -99,9 +102,10 @@ Route::middleware(['auth', 'role:dentist'])->prefix('dentist')->group(function (
     Route::get('/dashboard', [DentistDashboardController::class, 'index'])->name('dentist.dashboard');
     
     // Profile
-    Route::get('/profile', fn() => Inertia::render('Dentist/Profile', ['user' => auth()->user(), 'dentist' => auth()->user()->dentist]))->name('dentist.profile');
+    Route::get('/profile', [DentistProfileController::class, 'show'])->name('dentist.profile');
     Route::patch('/profile', [DentistProfileController::class, 'update'])->name('dentist.profile.update');
     Route::patch('/profile/password', [DentistProfileController::class, 'updatePassword'])->name('dentist.profile.password');
+    Route::patch('/profile/preferences', [DentistProfileController::class, 'updatePreferences'])->name('dentist.profile.preferences');
     
     Route::resource('/patients', DentistPatientController::class, ['only' => ['index', 'show']]);
     Route::get('/patients/export/pdf', [DentistPatientController::class, 'exportPdf'])->name('dentist.patients.export-pdf');
@@ -124,9 +128,10 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->group(function () {
     Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('staff.dashboard');
     
     // Profile
-    Route::get('/profile', fn() => Inertia::render('Staff/Profile', ['user' => auth()->user()]))->name('staff.profile');
-    Route::patch('/profile', fn() => back()->with('success', 'Profile updated'))->name('staff.profile.update');
-    Route::patch('/profile/password', fn() => back()->with('success', 'Password updated'))->name('staff.profile.password');
+    Route::get('/profile', [StaffProfileController::class, 'show'])->name('staff.profile');
+    Route::patch('/profile', [StaffProfileController::class, 'update'])->name('staff.profile.update');
+    Route::patch('/profile/password', [StaffProfileController::class, 'updatePassword'])->name('staff.profile.password');
+    Route::patch('/profile/preferences', [StaffProfileController::class, 'updatePreferences'])->name('staff.profile.preferences');
     
     Route::resource('/patients', StaffPatientController::class, ['only' => ['create', 'store']]);
     Route::get('/inquiries', [StaffPatientInquiryController::class, 'index'])->name('staff.inquiries.index');
@@ -158,6 +163,7 @@ Route::middleware(['auth', 'role:patient'])->prefix('patient')->group(function (
     Route::patch('/profile', [PatientProfileController::class, 'update'])->name('patient.profile.update');
     Route::post('/profile/request-change', [PatientProfileController::class, 'requestChange'])->name('patient.profile.request-change');
     Route::patch('/profile/password', [PatientProfileController::class, 'updatePassword'])->name('patient.profile.password');
+    Route::patch('/profile/preferences', [PatientProfileController::class, 'updatePreferences'])->name('patient.profile.preferences');
     
     Route::resource('/appointments', PatientAppointmentController::class, ['only' => ['index', 'destroy']]);
     Route::get('/appointments/export/pdf', [PatientAppointmentController::class, 'exportPdf'])->name('patient.appointments.export-pdf');

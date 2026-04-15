@@ -1,131 +1,171 @@
-import AdminLayout from '@/Layouts/AdminLayout'
-import { useForm } from '@inertiajs/react'
-import { useState } from 'react'
+import AdminLayout from '@/Layouts/AdminLayout';
+import { useForm } from '@inertiajs/react';
 
-export default function AdminProfile({ user }) {
-    const [showPassword, setShowPassword] = useState(false)
-    const { data, setData, patch, processing, errors } = useForm({
-        name: user?.name || '',
-        email: user?.email || '',
+const preferenceRows = [
+    ['in_app_notifications', 'In-app notifications'],
+    ['email_notifications', 'Email notifications'],
+    ['appointment_updates', 'Appointment updates'],
+    ['reminder_notifications', 'Reminder notifications'],
+];
+
+const uiRows = [
+    ['compact_tables', 'Compact tables'],
+    ['show_timestamps_24h', '24-hour timestamps'],
+];
+
+export default function AdminProfile({ user, settings }) {
+    const accountForm = useForm({
+        name: user?.name ?? '',
+        email: user?.email ?? '',
+    });
+
+    const passwordForm = useForm({
         current_password: '',
         new_password: '',
         new_password_confirmation: '',
-    })
+    });
 
-    const handleProfileUpdate = () => {
-        patch('/admin/profile', {
-            onSuccess: () => {
-                alert('Profile updated successfully')
-            }
-        })
-    }
-
-    const handlePasswordUpdate = () => {
-        patch('/admin/profile/password', {
-            onSuccess: () => {
-                setData({ ...data, current_password: '', new_password: '', new_password_confirmation: '' })
-                alert('Password updated successfully')
-            }
-        })
-    }
+    const preferencesForm = useForm({
+        notification_preferences: settings?.notification_preferences ?? {},
+        ui_preferences: settings?.ui_preferences ?? {},
+    });
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-[#E2FAF7]">Profile Settings</h1>
-
-            {/* Personal Information */}
-            <div className="bg-[#0E2C28] border border-[rgba(45,212,191,0.12)] p-6 rounded-lg">
-                <h2 className="text-xl font-bold text-[#0D9488] mb-4">Personal Information</h2>
-                <div className="space-y-4 max-w-md">
-                    <div>
-                        <label className="block text-[#7ABFB9] mb-2">Full Name</label>
-                        <input
-                            type="text"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            className="w-full px-4 py-2 bg-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded text-[#E2FAF7]"
-                        />
-                        {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-                    </div>
-
-                    <div>
-                        <label className="block text-[#7ABFB9] mb-2">Email Address</label>
-                        <input
-                            type="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            className="w-full px-4 py-2 bg-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded text-[#E2FAF7]"
-                        />
-                        {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-                    </div>
-
-                    <button
-                        onClick={handleProfileUpdate}
-                        disabled={processing}
-                        className="w-full px-4 py-2 bg-[#0D9488] text-white rounded hover:bg-[#14B8A6] transition-colors disabled:opacity-50"
-                    >
-                        {processing ? 'Saving...' : 'Update Profile'}
-                    </button>
+        <div className="dcms-page">
+            <div className="dcms-page-header">
+                <div>
+                    <h1 className="dcms-page-title">User Settings</h1>
+                    <p className="dcms-page-subtitle">Manage your administrator account details, password, and dashboard preferences.</p>
                 </div>
             </div>
 
-            {/* Change Password */}
-            <div className="bg-[#0E2C28] border border-[rgba(45,212,191,0.12)] p-6 rounded-lg">
-                <h2 className="text-xl font-bold text-[#0D9488] mb-4">Change Password</h2>
-                <div className="space-y-4 max-w-md">
-                    <div>
-                        <label className="block text-[#7ABFB9] mb-2">Current Password</label>
-                        <input
-                            type="password"
-                            value={data.current_password}
-                            onChange={(e) => setData('current_password', e.target.value)}
-                            className="w-full px-4 py-2 bg-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded text-[#E2FAF7]"
-                        />
-                        {errors.current_password && <p className="text-red-400 text-sm mt-1">{errors.current_password}</p>}
+            <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+                <section className="dcms-card">
+                    <div className="dcms-card-body text-center">
+                        <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-[var(--dcms-deep-teal)] text-3xl font-bold text-white">
+                            {user?.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <h2 className="mt-4 text-2xl">{user.name}</h2>
+                        <p className="mt-2 text-sm text-[var(--dcms-text-soft)]">{user.email}</p>
+                        <span className="mt-6 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
+                            Administrator
+                        </span>
                     </div>
+                </section>
 
-                    <div>
-                        <label className="block text-[#7ABFB9] mb-2">New Password</label>
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            value={data.new_password}
-                            onChange={(e) => setData('new_password', e.target.value)}
-                            className="w-full px-4 py-2 bg-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded text-[#E2FAF7]"
-                        />
-                        {errors.new_password && <p className="text-red-400 text-sm mt-1">{errors.new_password}</p>}
+                <section className="dcms-card">
+                    <div className="dcms-card-body grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label className="dcms-label">Full Name</label>
+                            <input className="dcms-input" value={accountForm.data.name} onChange={(event) => accountForm.setData('name', event.target.value)} />
+                            {accountForm.errors.name && <p className="mt-1 text-sm text-red-500">{accountForm.errors.name}</p>}
+                        </div>
+                        <div>
+                            <label className="dcms-label">Email Address</label>
+                            <input className="dcms-input" type="email" value={accountForm.data.email} onChange={(event) => accountForm.setData('email', event.target.value)} />
+                            {accountForm.errors.email && <p className="mt-1 text-sm text-red-500">{accountForm.errors.email}</p>}
+                        </div>
+                        <div className="md:col-span-2 flex justify-end">
+                            <button
+                                className="dcms-btn-primary"
+                                onClick={() => accountForm.patch('/admin/profile', { preserveScroll: true })}
+                                disabled={accountForm.processing}
+                            >
+                                {accountForm.processing ? 'Saving...' : 'Save Account'}
+                            </button>
+                        </div>
                     </div>
+                </section>
 
-                    <div>
-                        <label className="block text-[#7ABFB9] mb-2">Confirm New Password</label>
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            value={data.new_password_confirmation}
-                            onChange={(e) => setData('new_password_confirmation', e.target.value)}
-                            className="w-full px-4 py-2 bg-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded text-[#E2FAF7]"
-                        />
+                <section className="dcms-card">
+                    <div className="dcms-card-body grid gap-4">
+                        <div>
+                            <label className="dcms-label">Current Password</label>
+                            <input type="password" className="dcms-input" value={passwordForm.data.current_password} onChange={(event) => passwordForm.setData('current_password', event.target.value)} />
+                            {passwordForm.errors.current_password && <p className="mt-1 text-sm text-red-500">{passwordForm.errors.current_password}</p>}
+                        </div>
+                        <div>
+                            <label className="dcms-label">New Password</label>
+                            <input type="password" className="dcms-input" value={passwordForm.data.new_password} onChange={(event) => passwordForm.setData('new_password', event.target.value)} />
+                            {passwordForm.errors.new_password && <p className="mt-1 text-sm text-red-500">{passwordForm.errors.new_password}</p>}
+                        </div>
+                        <div>
+                            <label className="dcms-label">Confirm New Password</label>
+                            <input type="password" className="dcms-input" value={passwordForm.data.new_password_confirmation} onChange={(event) => passwordForm.setData('new_password_confirmation', event.target.value)} />
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                className="dcms-btn-secondary"
+                                onClick={() =>
+                                    passwordForm.patch('/admin/profile/password', {
+                                        preserveScroll: true,
+                                        onSuccess: () => passwordForm.reset(),
+                                    })
+                                }
+                                disabled={passwordForm.processing}
+                            >
+                                {passwordForm.processing ? 'Updating...' : 'Update Password'}
+                            </button>
+                        </div>
                     </div>
+                </section>
 
-                    <label className="flex items-center gap-2 text-[#7ABFB9]">
-                        <input
-                            type="checkbox"
-                            checked={showPassword}
-                            onChange={(e) => setShowPassword(e.target.checked)}
-                            className="rounded"
-                        />
-                        Show password
-                    </label>
+                <section className="dcms-card">
+                    <div className="dcms-card-body grid gap-6 md:grid-cols-2">
+                        <div className="space-y-4">
+                            <h2 className="text-xl">Notification Preferences</h2>
+                            {preferenceRows.map(([field, label]) => (
+                                <label key={field} className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--dcms-border)] px-4 py-3">
+                                    <span className="text-sm font-medium text-[var(--dcms-text)]">{label}</span>
+                                    <input
+                                        type="checkbox"
+                                        checked={preferencesForm.data.notification_preferences[field]}
+                                        onChange={(event) =>
+                                            preferencesForm.setData('notification_preferences', {
+                                                ...preferencesForm.data.notification_preferences,
+                                                [field]: event.target.checked,
+                                            })
+                                        }
+                                        className="h-4 w-4 accent-[var(--dcms-primary)]"
+                                    />
+                                </label>
+                            ))}
+                        </div>
 
-                    <button
-                        onClick={handlePasswordUpdate}
-                        disabled={processing}
-                        className="w-full px-4 py-2 bg-[#F59E0B] text-white rounded hover:bg-opacity-80 transition-colors disabled:opacity-50"
-                    >
-                        {processing ? 'Updating...' : 'Update Password'}
-                    </button>
-                </div>
+                        <div className="space-y-4">
+                            <h2 className="text-xl">Display Preferences</h2>
+                            {uiRows.map(([field, label]) => (
+                                <label key={field} className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--dcms-border)] px-4 py-3">
+                                    <span className="text-sm font-medium text-[var(--dcms-text)]">{label}</span>
+                                    <input
+                                        type="checkbox"
+                                        checked={preferencesForm.data.ui_preferences[field]}
+                                        onChange={(event) =>
+                                            preferencesForm.setData('ui_preferences', {
+                                                ...preferencesForm.data.ui_preferences,
+                                                [field]: event.target.checked,
+                                            })
+                                        }
+                                        className="h-4 w-4 accent-[var(--dcms-primary)]"
+                                    />
+                                </label>
+                            ))}
+                        </div>
+
+                        <div className="md:col-span-2 flex justify-end">
+                            <button
+                                className="dcms-btn-primary"
+                                onClick={() => preferencesForm.patch('/admin/profile/preferences', { preserveScroll: true })}
+                                disabled={preferencesForm.processing}
+                            >
+                                {preferencesForm.processing ? 'Saving...' : 'Save Preferences'}
+                            </button>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
-    )
+    );
 }
 
-AdminProfile.layout = (page) => <AdminLayout>{page}</AdminLayout>
+AdminProfile.layout = (page) => <AdminLayout>{page}</AdminLayout>;

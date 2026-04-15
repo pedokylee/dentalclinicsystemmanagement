@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Patient;
 
+use App\Http\Controllers\Concerns\InteractsWithUserSettings;
 use App\Models\Patient;
 use App\Models\ProfileChangeRequest;
 use Illuminate\Routing\Controller;
@@ -11,9 +12,11 @@ use App\Models\AuditLog;
 
 class ProfileController extends Controller
 {
+    use InteractsWithUserSettings;
+
     public function show()
     {
-        $user = auth()->user();
+        $user = $this->loadUserSettings(auth()->user());
         $patient = Patient::where('user_id', $user->id)->first();
 
         if (!$patient) {
@@ -28,6 +31,7 @@ class ProfileController extends Controller
             'user' => $user,
             'patient' => $patient,
             'pendingRequests' => $pendingRequests,
+            'settings' => $this->settingsPayload($user),
         ]);
     }
 
@@ -113,5 +117,33 @@ class ProfileController extends Controller
         AuditLog::log('updated', 'patient_password', 'Updated own password');
 
         return back()->with('success', 'Password updated successfully.');
+    }
+
+    public function updatePreferences(Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $this->settingsAvailable()) {
+            return back()->with('error', $this->settingsUnavailableMessage());
+        }
+
+        $validated = $request->validate([
+            'notification_preferences.in_app_notifications' => 'required|boolean',
+            'notification_preferences.email_notifications' => 'required|boolean',
+            'notification_preferences.appointment_updates' => 'required|boolean',
+            'notification_preferences.reminder_notifications' => 'required|boolean',
+            'ui_preferences.compact_tables' => 'required|boolean',
+            'ui_preferences.show_timestamps_24h' => 'required|boolean',
+        ]);
+
+        $this->persistSettings(
+            $user,
+            $validated['notification_preferences'],
+            $validated['ui_preferences']
+        );
+
+        AuditLog::log('updated', 'patient_preferences', 'Updated own preferences');
+
+        return back()->with('success', 'Preferences updated successfully.');
     }
 }

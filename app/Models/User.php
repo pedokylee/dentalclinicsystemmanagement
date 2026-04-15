@@ -25,6 +25,11 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\Patient::class);
     }
 
+    public function settings(): HasOne
+    {
+        return $this->hasOne(\App\Models\UserSetting::class);
+    }
+
     public function auditLogs(): HasMany
     {
         return $this->hasMany(\App\Models\AuditLog::class);

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Dentist;
+namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Concerns\InteractsWithUserSettings;
 use App\Models\AuditLog;
-use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
@@ -15,12 +15,10 @@ class ProfileController extends Controller
 
     public function show()
     {
-        $user = auth()->user()->load('dentist');
-        $user = $this->loadUserSettings($user);
+        $user = $this->loadUserSettings(auth()->user());
 
-        return Inertia::render('Dentist/Profile', [
+        return Inertia::render('Staff/Profile', [
             'user' => $user,
-            'dentist' => $user->dentist,
             'settings' => $this->settingsPayload($user),
         ]);
     }
@@ -28,33 +26,16 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = auth()->user();
-        
-        // Validate user profile fields
-        $userValidated = $request->validate([
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
         ]);
 
-        // Update user data
-        $user->update($userValidated);
+        $user->update($validated);
+        AuditLog::log('updated', 'staff_profile', 'Updated own account settings');
 
-        // Validate and update dentist-specific fields if present
-        if ($request->has('specialization')) {
-            $dentistValidated = $request->validate([
-                'specialization' => 'nullable|string|max:255',
-                'schedule_days' => 'required|array|min:1',
-                'schedule_days.*' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
-            ]);
-
-            $dentist = $user->dentist;
-            if ($dentist) {
-                $dentist->update($dentistValidated);
-            }
-        }
-
-        AuditLog::log('updated', 'dentist_profile', 'Updated own profile');
-
-        return back()->with('success', 'Profile updated successfully');
+        return back()->with('success', 'Account settings updated successfully.');
     }
 
     public function updatePassword(Request $request)
@@ -68,9 +49,9 @@ class ProfileController extends Controller
             'password' => Hash::make($validated['new_password']),
         ]);
 
-        AuditLog::log('updated', 'dentist_password', 'Updated own password');
+        AuditLog::log('updated', 'staff_password', 'Updated own password');
 
-        return back()->with('success', 'Password updated successfully');
+        return back()->with('success', 'Password updated successfully.');
     }
 
     public function updatePreferences(Request $request)
@@ -96,7 +77,7 @@ class ProfileController extends Controller
             $validated['ui_preferences']
         );
 
-        AuditLog::log('updated', 'dentist_preferences', 'Updated own preferences');
+        AuditLog::log('updated', 'staff_preferences', 'Updated own preferences');
 
         return back()->with('success', 'Preferences updated successfully.');
     }
