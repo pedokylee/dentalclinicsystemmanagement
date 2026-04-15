@@ -13,13 +13,14 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Helpers\ClinicHelper;
+use App\Support\AppointmentAvailability;
 
 class AppointmentController extends Controller
 {
     public function create()
     {
         $patients = Patient::all(['id', 'first_name', 'last_name']);
-        $dentists = Dentist::with('user:id,name')->get(['id', 'user_id']);
+        $dentists = Dentist::with('user:id,name,active')->get(['id', 'user_id', 'specialization', 'schedule_days']);
 
         // Generate available time slots using clinic config
         $timeSlots = ClinicHelper::generateTimeSlots();
@@ -42,14 +43,20 @@ class AppointmentController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Check for conflicts
-        $conflict = Appointment::where('dentist_id', $validated['dentist_id'])
-            ->where('appointment_date', $validated['appointment_date'])
-            ->where('appointment_time', $validated['appointment_time'])
-            ->exists();
+        $dentist = Dentist::with('user')->findOrFail($validated['dentist_id']);
+        $reason = AppointmentAvailability::unavailableReason(
+            $dentist,
+            $validated['appointment_date'],
+            $validated['appointment_time']
+        );
 
-        if ($conflict) {
-            return back()->with('error', 'This dentist already has an appointment at that date/time.');
+        if ($reason) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'appointment_time' => $reason,
+                    'dentist_id' => $reason,
+                ]);
         }
 
         $appointment = Appointment::create([
@@ -59,8 +66,6 @@ class AppointmentController extends Controller
 
         // Get related models
         $patient = Patient::find($validated['patient_id']);
-        $dentist = Dentist::find($validated['dentist_id']);
-
         // Send email to dentist
         Mail::to($dentist->user->email)->send(new AppointmentBooked($appointment, 'dentist'));
 

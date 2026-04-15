@@ -1,9 +1,25 @@
-import { useForm, usePage, router } from '@inertiajs/react'
-import { useState, useEffect } from 'react'
-import { Link } from '@inertiajs/react'
-import { CalendarIcon, ClockIcon, UserIcon, MailIcon, PhoneIcon, AlertCircleIcon, CheckCircleIcon } from 'lucide-react'
+import { router, useForm } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { CalendarIcon, UserIcon, MailIcon, PhoneIcon, AlertCircleIcon, CheckCircleIcon } from 'lucide-react';
 
-export default function BookPublic({ dentists, timeSlots, availableDays }) {
+function isDentistWorkingOnDate(dentist, date) {
+    if (!date) {
+        return true;
+    }
+
+    const scheduleDays = dentist?.schedule_days;
+
+    if (!Array.isArray(scheduleDays) || scheduleDays.length === 0) {
+        return true;
+    }
+
+    const dayName = new Date(`${date}T00:00:00`).toLocaleDateString('en-US', { weekday: 'long' });
+
+    return scheduleDays.includes(dayName);
+}
+
+export default function BookPublic({ dentists, timeSlots, availableDays, existingAppointments = [] }) {
     const { data, setData, post, errors, processing } = useForm({
         first_name: '',
         last_name: '',
@@ -14,49 +30,121 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
         dentist_id: '',
         type: 'checkup',
         notes: '',
-    })
+    });
 
-    const [conflict, setConflict] = useState(null)
-    const [availableSlots, setAvailableSlots] = useState(timeSlots || [])
+    const [conflict, setConflict] = useState(null);
+    const [availableSlots, setAvailableSlots] = useState(timeSlots || []);
+    const [availabilityMessage, setAvailabilityMessage] = useState(null);
+
+    const dentistAvailability = useMemo(() => {
+        return Object.fromEntries(
+            dentists.map((dentist) => {
+                if (dentist?.user?.active === false) {
+                    return [String(dentist.id), { available: false, reason: 'Currently inactive' }];
+                }
+
+                if (!isDentistWorkingOnDate(dentist, data.appointment_date)) {
+                    return [String(dentist.id), { available: false, reason: 'Not scheduled on this day' }];
+                }
+
+                if (data.appointment_date && data.appointment_time) {
+                    const hasConflict = existingAppointments.some((appointment) =>
+                        String(appointment.dentist_id) === String(dentist.id) &&
+                        appointment.appointment_date === data.appointment_date &&
+                        appointment.appointment_time === data.appointment_time
+                    );
+
+                    if (hasConflict) {
+                        return [String(dentist.id), { available: false, reason: 'Already booked for this slot' }];
+                    }
+                }
+
+                return [String(dentist.id), { available: true, reason: null }];
+            })
+        );
+    }, [data.appointment_date, data.appointment_time, dentists, existingAppointments]);
 
     useEffect(() => {
-        // Fetch available time slots when date or dentist changes
-        if (data.appointment_date && data.dentist_id) {
-            fetch(`/appointments/available-times?date=${data.appointment_date}&dentist_id=${data.dentist_id}`)
-                .then(res => {
-                    if (res.status === 401) {
-                        router.visit('/login')
-                        return
-                    }
-                    return res.json()
-                })
-                .then(result => {
-                    if (result && result.available_times) {
-                        setAvailableSlots(result.available_times)
-                    }
-                })
-                .catch(err => console.error('Error fetching times:', err))
+        if (!data.appointment_date || !data.dentist_id) {
+            setAvailableSlots(timeSlots || []);
+            setAvailabilityMessage(null);
+            return;
         }
-    }, [data.appointment_date, data.dentist_id, timeSlots])
+
+        let active = true;
+
+        window.axios
+            .get('/appointments/available-times', {
+                params: {
+                    date: data.appointment_date,
+                    dentist_id: data.dentist_id,
+                },
+            })
+            .then(({ data: result }) => {
+                if (active) {
+                    setAvailableSlots(result?.available_times ?? []);
+                    setAvailabilityMessage(result?.unavailable_reason ?? null);
+                }
+            })
+            .catch((error) => {
+                if (error?.response?.status === 401) {
+                    router.visit('/login');
+                    return;
+                }
+
+                if (active) {
+                    setAvailableSlots(timeSlots || []);
+                    setAvailabilityMessage(null);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [data.appointment_date, data.dentist_id, timeSlots]);
+
+    useEffect(() => {
+        if (!data.appointment_time) {
+            return;
+        }
+
+        if (!availableSlots.includes(data.appointment_time)) {
+            setData('appointment_time', '');
+            setConflict('Please choose another time for this dentist.');
+            return;
+        }
+
+        setConflict(null);
+    }, [availableSlots, data.appointment_time, setData]);
 
     function handleTimeSelect(time) {
-        setData('appointment_time', time)
-        // Check for conflicts (mock)
-        setConflict(null)
+        if (!availableSlots.includes(time)) {
+            return;
+        }
+
+        setData('appointment_time', time);
+        setConflict(null);
     }
 
-    function submit(e) {
-        e.preventDefault()
-        post('/appointments/store-public', {
-            onSuccess: () => {
-                // Redirect to confirmation page
-            },
-        })
+    function submit(event) {
+        event.preventDefault();
+        post('/appointments/store-public');
     }
+
+    const canSubmit =
+        !processing &&
+        data.first_name &&
+        data.last_name &&
+        data.email &&
+        data.phone &&
+        data.appointment_date &&
+        data.appointment_time &&
+        data.dentist_id &&
+        !availabilityMessage &&
+        availableSlots.includes(data.appointment_time);
 
     return (
         <div className="min-h-screen bg-[#061A18]">
-            {/* Navigation */}
             <nav className="sticky top-0 z-50 bg-[#061A18]/95 backdrop-blur border-b border-[rgba(45,212,191,0.1)]">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3">
@@ -72,7 +160,6 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
 
             <div className="max-w-6xl mx-auto px-6 py-12">
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Main Form */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="mb-8">
                             <h1 className="text-4xl font-bold text-[#E2FAF7] mb-2">Book Your Appointment</h1>
@@ -80,7 +167,6 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                         </div>
 
                         <form onSubmit={submit} className="space-y-6">
-                            {/* Personal Information */}
                             <div className="bg-[#0E2C28] border border-[rgba(45,212,191,0.12)] rounded-2xl p-8">
                                 <h2 className="text-xl font-bold text-[#E2FAF7] mb-6 flex items-center gap-3">
                                     <UserIcon className="text-[#0D9488]" size={24} />
@@ -92,7 +178,7 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                         <input
                                             type="text"
                                             value={data.first_name}
-                                            onChange={(e) => setData('first_name', e.target.value)}
+                                            onChange={(event) => setData('first_name', event.target.value)}
                                             className={`w-full px-4 py-2 bg-[#061A18] border rounded-lg text-[#E2FAF7] placeholder-[#7ABFB9]/50 focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] outline-none transition-all ${
                                                 errors.first_name ? 'border-red-500' : 'border-[rgba(45,212,191,0.2)]'
                                             }`}
@@ -105,7 +191,7 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                         <input
                                             type="text"
                                             value={data.last_name}
-                                            onChange={(e) => setData('last_name', e.target.value)}
+                                            onChange={(event) => setData('last_name', event.target.value)}
                                             className={`w-full px-4 py-2 bg-[#061A18] border rounded-lg text-[#E2FAF7] placeholder-[#7ABFB9]/50 focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] outline-none transition-all ${
                                                 errors.last_name ? 'border-red-500' : 'border-[rgba(45,212,191,0.2)]'
                                             }`}
@@ -118,7 +204,7 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                         <input
                                             type="email"
                                             value={data.email}
-                                            onChange={(e) => setData('email', e.target.value)}
+                                            onChange={(event) => setData('email', event.target.value)}
                                             className={`w-full px-4 py-2 bg-[#061A18] border rounded-lg text-[#E2FAF7] placeholder-[#7ABFB9]/50 focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] outline-none transition-all ${
                                                 errors.email ? 'border-red-500' : 'border-[rgba(45,212,191,0.2)]'
                                             }`}
@@ -131,7 +217,7 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                         <input
                                             type="tel"
                                             value={data.phone}
-                                            onChange={(e) => setData('phone', e.target.value)}
+                                            onChange={(event) => setData('phone', event.target.value)}
                                             className={`w-full px-4 py-2 bg-[#061A18] border rounded-lg text-[#E2FAF7] placeholder-[#7ABFB9]/50 focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] outline-none transition-all ${
                                                 errors.phone ? 'border-red-500' : 'border-[rgba(45,212,191,0.2)]'
                                             }`}
@@ -142,19 +228,17 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                 </div>
                             </div>
 
-                            {/* Appointment Details */}
                             <div className="bg-[#0E2C28] border border-[rgba(45,212,191,0.12)] rounded-2xl p-8">
                                 <h2 className="text-xl font-bold text-[#E2FAF7] mb-6 flex items-center gap-3">
                                     <CalendarIcon className="text-[#0D9488]" size={24} />
                                     Appointment Details
                                 </h2>
                                 <div className="space-y-4">
-                                    {/* Appointment Type */}
                                     <div>
                                         <label className="block text-sm font-medium text-[#7ABFB9] mb-2">Appointment Type *</label>
                                         <select
                                             value={data.type}
-                                            onChange={(e) => setData('type', e.target.value)}
+                                            onChange={(event) => setData('type', event.target.value)}
                                             className="w-full px-4 py-2 bg-[#061A18] border border-[rgba(45,212,191,0.2)] rounded-lg text-[#E2FAF7] focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] outline-none transition-all"
                                         >
                                             <option value="checkup">Regular Checkup</option>
@@ -167,37 +251,56 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                         </select>
                                     </div>
 
-                                    {/* Dentist Selection */}
                                     <div>
                                         <label className="block text-sm font-medium text-[#7ABFB9] mb-3">Select Dentist *</label>
                                         <div className="grid md:grid-cols-2 gap-3">
-                                            {dentists.map((dentist) => (
-                                                <button
-                                                    key={dentist.id}
-                                                    type="button"
-                                                    onClick={() => setData('dentist_id', dentist.id)}
-                                                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                                                        data.dentist_id === dentist.id
-                                                            ? 'border-[#0D9488] bg-[#0D9488]/10'
-                                                            : 'border-[rgba(45,212,191,0.2)] hover:border-[#0D9488]/50'
-                                                    }`}
-                                                >
-                                                    <div className="font-medium text-[#E2FAF7]">{dentist.user.name}</div>
-                                                    <div className="text-sm text-[#7ABFB9]">{dentist.specialization}</div>
-                                                </button>
-                                            ))}
+                                            {dentists.map((dentist) => {
+                                                const availability = dentistAvailability[String(dentist.id)] ?? { available: true, reason: null };
+                                                const isSelected = String(data.dentist_id) === String(dentist.id);
+
+                                                return (
+                                                    <button
+                                                        key={dentist.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (!availability.available) {
+                                                                return;
+                                                            }
+
+                                                            setData('dentist_id', dentist.id);
+                                                        }}
+                                                        disabled={!availability.available}
+                                                        className={`p-4 rounded-lg border-2 transition-all text-left ${
+                                                            isSelected
+                                                                ? availability.available
+                                                                    ? 'border-[#0D9488] bg-[#0D9488]/10'
+                                                                    : 'border-[#F59E0B]/60 bg-[#F59E0B]/10 text-[#7ABFB9]'
+                                                                : availability.available
+                                                                    ? 'border-[rgba(45,212,191,0.2)] hover:border-[#0D9488]/50'
+                                                                    : 'cursor-not-allowed border-[rgba(255,255,255,0.08)] bg-white/5 text-[#7ABFB9]/60 opacity-70'
+                                                        }`}
+                                                    >
+                                                        <div className="font-medium text-[#E2FAF7]">{dentist.user.name}</div>
+                                                        <div className="text-sm text-[#7ABFB9]">{dentist.specialization || 'General Dentistry'}</div>
+                                                        {!availability.available && (
+                                                            <div className="mt-2 text-xs font-semibold text-[#99F6E4]/70">{availability.reason}</div>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                         {errors.dentist_id && <p className="mt-1 text-sm text-red-400">{errors.dentist_id}</p>}
                                     </div>
 
-                                    {/* Date & Time */}
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-[#7ABFB9] mb-2">Date *</label>
                                             <input
                                                 type="date"
                                                 value={data.appointment_date}
-                                                onChange={(e) => setData('appointment_date', e.target.value)}
+                                                onChange={(event) => setData('appointment_date', event.target.value)}
+                                                min={availableDays?.[0]}
+                                                max={availableDays?.[availableDays.length - 1]}
                                                 className={`w-full px-4 py-2 bg-[#061A18] border rounded-lg text-[#E2FAF7] focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] outline-none transition-all ${
                                                     errors.appointment_date ? 'border-red-500' : 'border-[rgba(45,212,191,0.2)]'
                                                 }`}
@@ -206,7 +309,15 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                         </div>
                                     </div>
 
-                                    {/* Time Slots */}
+                                    {availabilityMessage && (
+                                        <div className="p-4 bg-[#F59E0B]/10 border border-[#F59E0B]/40 rounded-lg flex items-start gap-3">
+                                            <AlertCircleIcon className="text-[#F59E0B] mt-0.5" size={20} />
+                                            <p className="text-[#FDE68A]">
+                                                <strong>Dentist unavailable:</strong> {availabilityMessage}
+                                            </p>
+                                        </div>
+                                    )}
+
                                     <div>
                                         <label className="block text-sm font-medium text-[#7ABFB9] mb-3">Select Time *</label>
                                         <div className="grid grid-cols-4 gap-2">
@@ -228,22 +339,20 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                         {errors.appointment_time && <p className="mt-1 text-sm text-red-400">{errors.appointment_time}</p>}
                                     </div>
 
-                                    {/* Conflict Warning */}
                                     {conflict && (
                                         <div className="p-4 bg-red-900/20 border border-red-500/50 rounded-lg flex items-start gap-3">
                                             <AlertCircleIcon className="text-red-400 mt-0.5" size={20} />
                                             <p className="text-red-400">
-                                                <strong>Slot Unavailable:</strong> This time is already booked. Please select another time.
+                                                <strong>Slot unavailable:</strong> {conflict}
                                             </p>
                                         </div>
                                     )}
 
-                                    {/* Notes */}
                                     <div>
                                         <label className="block text-sm font-medium text-[#7ABFB9] mb-2">Additional Notes</label>
                                         <textarea
                                             value={data.notes}
-                                            onChange={(e) => setData('notes', e.target.value)}
+                                            onChange={(event) => setData('notes', event.target.value)}
                                             rows="4"
                                             className="w-full px-4 py-2 bg-[#061A18] border border-[rgba(45,212,191,0.2)] rounded-lg text-[#E2FAF7] placeholder-[#7ABFB9]/50 focus:border-[#0D9488] focus:ring-1 focus:ring-[#0D9488] outline-none transition-all resize-none"
                                             placeholder="Any specific concerns or questions for your visit..."
@@ -252,10 +361,9 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                                 </div>
                             </div>
 
-                            {/* Submit Button */}
                             <button
                                 type="submit"
-                                disabled={processing}
+                                disabled={!canSubmit}
                                 className="w-full py-3 bg-[#0D9488] text-white rounded-lg hover:bg-[#0A7A70] disabled:bg-gray-600 transition-all font-bold flex items-center justify-center gap-2"
                             >
                                 <CheckCircleIcon size={20} />
@@ -268,9 +376,7 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                         </form>
                     </div>
 
-                    {/* Sidebar - Info */}
                     <div className="space-y-6">
-                        {/* Info Card */}
                         <div className="bg-gradient-to-br from-[#0E2C28] to-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded-2xl p-6">
                             <h3 className="text-lg font-bold text-[#E2FAF7] mb-4">Important Information</h3>
                             <ul className="space-y-3 text-sm text-[#7ABFB9]">
@@ -293,7 +399,6 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                             </ul>
                         </div>
 
-                        {/* Contact Card */}
                         <div className="bg-gradient-to-br from-[#0E2C28] to-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded-2xl p-6">
                             <h3 className="text-lg font-bold text-[#E2FAF7] mb-4">Contact Us</h3>
                             <div className="space-y-4">
@@ -314,7 +419,6 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                             </div>
                         </div>
 
-                        {/* Hours Card */}
                         <div className="bg-gradient-to-br from-[#0E2C28] to-[#0F2724] border border-[rgba(45,212,191,0.12)] rounded-2xl p-6">
                             <h3 className="text-lg font-bold text-[#E2FAF7] mb-4">Office Hours</h3>
                             <div className="space-y-2 text-sm text-[#7ABFB9]">
@@ -336,5 +440,5 @@ export default function BookPublic({ dentists, timeSlots, availableDays }) {
                 </div>
             </div>
         </div>
-    )
+    );
 }

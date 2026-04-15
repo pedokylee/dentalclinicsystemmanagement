@@ -23,8 +23,8 @@ export default function FlashMessage() {
             {messages.map((msg, idx) => (
                 <div
                     key={idx}
-                    className={`fixed top-4 right-4 px-6 py-3 rounded-lg text-white shadow-lg animate-pulse ${
-                        msg.type === 'success' ? 'bg-[#0D9488]' : 'bg-red-500'
+                    className={`fixed right-6 top-6 z-[80] rounded-2xl px-5 py-4 text-sm font-semibold text-white shadow-2xl ${
+                        msg.type === 'success' ? 'bg-[var(--dcms-primary)]' : 'bg-red-500'
                     }`}
                 >
                     {msg.text}

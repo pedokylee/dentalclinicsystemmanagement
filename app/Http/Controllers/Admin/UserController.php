@@ -63,21 +63,20 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        // Check if this is just a status update (only 'active' field)
-        if ($request->has('active') && count($request->all()) === 1) {
-            // Status-only update
+        if ($request->has('active') && count($request->except(['_token', '_method', 'role'])) === 1) {
             $validated = $request->validate([
                 'active' => 'required|boolean',
             ]);
-            
+
             $user->update($validated);
-            
+
             AuditLog::log('updated', 'users', "Updated user status: {$user->name}");
-            
-            return response()->json(['success' => true, 'message' => 'User status updated successfully.']);
+
+            return redirect()
+                ->route('users.index', ['role' => $request->input('role', 'all')])
+                ->setStatusCode(303);
         }
-        
-        // Full user update
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,

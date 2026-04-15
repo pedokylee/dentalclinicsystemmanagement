@@ -1,99 +1,131 @@
-import { useForm } from '@inertiajs/react'
-import { Link } from '@inertiajs/react'
+import { Link, useForm } from '@inertiajs/react'
+import { ArrowLeft, LockKeyhole, Mail, Stethoscope, UserPlus2 } from 'lucide-react'
 
-export default function Login() {
+export default function Login({ canResetPassword }) {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
         remember: false,
     })
 
-    const submit = (e) => {
-        e.preventDefault()
+    const submit = (event) => {
+        event.preventDefault()
         post('/login')
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0a2723] to-[#051514]">
-            {/* Logo and Title */}
-            <div className="mb-12 text-center">
-                <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </div>
-                </div>
-                <h1 className="text-4xl font-bold text-white mb-2">DCMS Portal</h1>
-                <p className="text-lg text-teal-300">Dental Clinic Management System</p>
-            </div>
-
-            {/* Login Card */}
-            <div className="w-full max-w-md">
-                <div className="bg-white rounded-lg shadow-2xl p-8 md:p-10">
-                    <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Welcome Back</h2>
-
-                    <form onSubmit={submit} className="space-y-6">
-                        {/* Email */}
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(45,212,191,0.18),_transparent_30%),linear-gradient(180deg,#061A18_0%,#08211f_100%)] px-4 py-10">
+            <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl items-center justify-center">
+                <div className="grid w-full max-w-5xl gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+                    <div className="hidden rounded-[32px] border border-white/10 bg-white/5 p-10 text-white shadow-2xl backdrop-blur lg:flex lg:flex-col lg:justify-between">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                                placeholder="Enter your email"
-                                required
-                            />
-                            {errors.email && <p className="text-red-500 text-sm mt-2">{errors.email}</p>}
-                        </div>
-
-                        {/* Password */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
-                                placeholder="••••••••"
-                                required
-                            />
-                            {errors.password && <p className="text-red-500 text-sm mt-2">{errors.password}</p>}
-                        </div>
-
-                        {/* Remember Me and Forgot Password */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="remember"
-                                    checked={data.remember}
-                                    onChange={(e) => setData('remember', e.target.checked)}
-                                    className="w-4 h-4 text-teal-500 rounded focus:ring-2 focus:ring-teal-500 cursor-pointer"
-                                />
-                                <label htmlFor="remember" className="ml-2 text-sm text-gray-600 cursor-pointer">
-                                    Remember me
-                                </label>
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dcms-primary)]">
+                                    <Stethoscope className="h-7 w-7" />
+                                </div>
+                                <div>
+                                    <p className="text-3xl font-bold">DCMS Portal</p>
+                                    <p className="text-sm uppercase tracking-[0.2em] text-[var(--dcms-light)]">Dental Clinic Management System</p>
+                                </div>
                             </div>
-                            <Link href="/forgot-password" className="text-sm text-teal-500 hover:text-teal-600 font-medium">
-                                Forgot Password?
-                            </Link>
+
+                            <div className="mt-14 space-y-6">
+                                <h1 className="text-5xl leading-tight text-white">One secure login for every clinic role.</h1>
+                                <p className="max-w-xl text-lg leading-8 text-[#cdeeed]">
+                                    Access patient care, appointments, reports, and clinic operations from one connected dashboard built for administrators, dentists, staff, and patients.
+                                </p>
+                            </div>
                         </div>
 
-                        {/* Submit */}
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full py-3 bg-teal-500 text-white rounded-lg font-medium hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {processing ? 'Signing in...' : 'Sign In'}
-                        </button>
-                    </form>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            {[
+                                ['Admin', 'System-wide reports and controls'],
+                                ['Dentist', 'Treatment records and schedules'],
+                                ['Staff', 'Registration, reminders, and check-in'],
+                            ].map(([title, copy]) => (
+                                <div key={title} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                    <p className="font-bold text-white">{title}</p>
+                                    <p className="mt-2 text-sm text-[#b8ddda]">{copy}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="dcms-card mx-auto w-full max-w-xl overflow-hidden border-0 shadow-[0_28px_80px_rgba(0,0,0,0.22)]">
+                        <div className="border-b border-[var(--dcms-border)] bg-[var(--dcms-surface)] px-8 py-6 text-center">
+                            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--dcms-primary)]">Welcome Back</p>
+                            <h2 className="mt-2 text-3xl">Sign in to DCMS</h2>
+                            <p className="mt-2 text-sm text-[var(--dcms-text-soft)]">Your role will be detected automatically after login.</p>
+                        </div>
+
+                        <div className="p-8">
+                            <form onSubmit={submit} className="space-y-5">
+                                <div>
+                                    <label className="dcms-label">Email</label>
+                                    <div className="relative">
+                                        <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--dcms-primary)]" />
+                                        <input
+                                            type="email"
+                                            value={data.email}
+                                            onChange={(event) => setData('email', event.target.value)}
+                                            className="dcms-input pl-12"
+                                            placeholder="you@example.com"
+                                            required
+                                        />
+                                    </div>
+                                    {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="dcms-label">Password</label>
+                                    <div className="relative">
+                                        <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--dcms-primary)]" />
+                                        <input
+                                            type="password"
+                                            value={data.password}
+                                            onChange={(event) => setData('password', event.target.value)}
+                                            className="dcms-input pl-12"
+                                            placeholder="Enter your password"
+                                            required
+                                        />
+                                    </div>
+                                    {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
+                                </div>
+
+                                <div className="flex items-center justify-between gap-4">
+                                    <label className="flex items-center gap-2 text-sm text-[var(--dcms-text-soft)]">
+                                        <input
+                                            type="checkbox"
+                                            checked={data.remember}
+                                            onChange={(event) => setData('remember', event.target.checked)}
+                                            className="rounded border-[var(--dcms-border)] text-[var(--dcms-primary)] focus:ring-[var(--dcms-primary)]"
+                                        />
+                                        Remember me
+                                    </label>
+                                    {canResetPassword && (
+                                        <Link href="/forgot-password" className="text-sm font-semibold text-[var(--dcms-gold)] italic hover:underline">
+                                            Forgot password?
+                                        </Link>
+                                    )}
+                                </div>
+
+                                <button type="submit" disabled={processing} className="dcms-btn-primary w-full justify-center py-3 text-base">
+                                    {processing ? 'Signing In...' : 'Login'}
+                                </button>
+                            </form>
+
+                            <div className="mt-6 space-y-3 border-t border-[var(--dcms-border)] pt-6">
+                                <Link href="/" className="dcms-btn-secondary w-full justify-center">
+                                    <ArrowLeft className="h-4 w-4" />
+                                    Back to Landing Page
+                                </Link>
+                                <a href="/#new-patient-intake" className="dcms-btn-gold flex w-full items-center justify-center gap-2">
+                                    <UserPlus2 className="h-4 w-4" />
+                                    New Patient Registration
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

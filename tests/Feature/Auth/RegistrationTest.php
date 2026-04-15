@@ -28,4 +28,25 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
     }
+
+    public function test_registration_preserves_booking_intent_and_assigns_patient_role(): void
+    {
+        $this->withSession([
+            'url.intended' => route('appointments.book'),
+        ]);
+
+        $response = $this->post('/register', [
+            'name' => 'Booking Patient',
+            'email' => 'booking@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertRedirect(route('appointments.book'));
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'booking@example.com',
+            'role' => 'patient',
+        ]);
+    }
 }

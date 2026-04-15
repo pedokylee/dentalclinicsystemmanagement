@@ -2,11 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LandingInquiryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\SystemConfigController;
 use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Dentist\DashboardController as DentistDashboardController;
 use App\Http\Controllers\Dentist\ProfileController as DentistProfileController;
@@ -16,9 +19,11 @@ use App\Http\Controllers\Dentist\AppointmentController as DentistAppointmentCont
 use App\Http\Controllers\Dentist\NotificationController as DentistNotificationController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\PatientController as StaffPatientController;
+use App\Http\Controllers\Staff\PatientInquiryController as StaffPatientInquiryController;
 use App\Http\Controllers\Staff\AppointmentController as StaffAppointmentController;
 use App\Http\Controllers\Staff\CheckinController;
 use App\Http\Controllers\Staff\NotificationController as StaffNotificationController;
+use App\Http\Controllers\Staff\ReportController as StaffReportController;
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\Patient\ProfileController as PatientProfileController;
 use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentController;
@@ -28,6 +33,25 @@ use App\Http\Controllers\Patient\NotificationController as PatientNotificationCo
 // Public Routes
 Route::get('/', function () {
     return Inertia::render('Home');
+})->name('home');
+Route::post('/inquiries', [LandingInquiryController::class, 'store'])->name('inquiries.store');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+
+        return redirect(match ($user->role) {
+            'admin' => route('admin.dashboard'),
+            'dentist' => route('dentist.dashboard'),
+            'staff' => route('staff.dashboard'),
+            'patient' => route('patient.dashboard'),
+            default => '/',
+        });
+    })->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Public Appointment Booking
@@ -61,8 +85,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     
     // Backup & System
     Route::resource('/backup', BackupController::class);
-    Route::get('/config', fn() => Inertia::render('Admin/Config'))->name('admin.config');
-    Route::post('/config', fn() => response()->json(['message' => 'Config saved']))->name('admin.config.save');
+    Route::post('/backup/{backup}/restore', [BackupController::class, 'update'])->name('admin.backup.restore');
+    Route::get('/config', [SystemConfigController::class, 'index'])->name('admin.config');
+    Route::post('/config', [SystemConfigController::class, 'store'])->name('admin.config.save');
     
     // Appointments
     Route::get('/appointments/create', [AdminAppointmentController::class, 'create'])->name('admin.appointments.create');
@@ -83,6 +108,7 @@ Route::middleware(['auth', 'role:dentist'])->prefix('dentist')->group(function (
     Route::get('/patients/export/excel', [DentistPatientController::class, 'exportExcel'])->name('dentist.patients.export-excel');
     
     Route::resource('/treatment', TreatmentController::class, ['only' => ['create', 'store', 'edit', 'update']]);
+    Route::get('/treatment/{treatment}/export-pdf', [TreatmentController::class, 'exportPdf'])->name('dentist.treatment.export-pdf');
     
     Route::resource('/appointments', DentistAppointmentController::class, ['only' => ['index', 'destroy']]);
     
@@ -103,12 +129,18 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->group(function () {
     Route::patch('/profile/password', fn() => back()->with('success', 'Password updated'))->name('staff.profile.password');
     
     Route::resource('/patients', StaffPatientController::class, ['only' => ['create', 'store']]);
+    Route::get('/inquiries', [StaffPatientInquiryController::class, 'index'])->name('staff.inquiries.index');
+    Route::get('/inquiries/{inquiry}/convert', [StaffPatientInquiryController::class, 'createConversion'])->name('staff.inquiries.convert');
+    Route::post('/inquiries/{inquiry}/convert', [StaffPatientInquiryController::class, 'storeConversion'])->name('staff.inquiries.store-conversion');
+    Route::patch('/inquiries/{inquiry}/reject', [StaffPatientInquiryController::class, 'reject'])->name('staff.inquiries.reject');
     
     Route::resource('/appointments', StaffAppointmentController::class);
+    Route::post('/appointments/{appointment}/reminder', [StaffAppointmentController::class, 'sendReminder'])->name('staff.appointments.reminder');
     Route::get('/appointments/export/pdf', [StaffAppointmentController::class, 'exportPdf'])->name('staff.appointments.export-pdf');
     Route::get('/appointments/export/excel', [StaffAppointmentController::class, 'exportExcel'])->name('staff.appointments.export-excel');
     
     Route::resource('/checkin', CheckinController::class, ['only' => ['index', 'update']]);
+    Route::get('/reports', [StaffReportController::class, 'index'])->name('staff.reports');
     
     Route::get('/notifications', [StaffNotificationController::class, 'index'])->name('staff.notifications.index');
     Route::get('/notifications/unread-count', [StaffNotificationController::class, 'getUnreadCount'])->name('staff.notifications.unread-count');

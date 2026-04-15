@@ -14,6 +14,9 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Helpers\ClinicHelper;
+use App\Support\AppointmentAvailability;
+use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class AppointmentController extends Controller
 {
@@ -41,12 +44,7 @@ class AppointmentController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $appointmentDateTime = \Carbon\Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $appointment->appointment_date->format('Y-m-d') . ' ' . $appointment->appointment_time
-        );
-        
-        if ($appointmentDateTime <= now()) {
+        if ($appointment->starts_at <= now()) {
             abort(403, 'Cannot cancel past appointments');
         }
 
@@ -59,14 +57,19 @@ class AppointmentController extends Controller
     // Public booking routes (no auth required)
     public function publicBook()
     {
-        // Redirect to login if not authenticated
-        if (!auth()->check()) {
+        $gate = $this->guardPatientBookingAccess();
+
+        if ($gate instanceof RedirectResponse) {
+            return $gate;
+        }
+
+        if (! auth()->check()) {
             session(['url.intended' => route('appointments.book')]);
             return redirect('/login');
         }
 
-        $dentists = Dentist::with('user')->get();
-        
+        $dentists = Dentist::with('user:id,name,active')->get(['id', 'user_id', 'specialization', 'schedule_days']);
+
         // Generate time slots using clinic config
         $timeSlots = ClinicHelper::generateTimeSlots();
 
@@ -74,13 +77,25 @@ class AppointmentController extends Controller
             'dentists' => $dentists,
             'timeSlots' => $timeSlots,
             'availableDays' => $this->getAvailableDays(),
+            'existingAppointments' => Appointment::where('status', '!=', 'cancelled')
+                ->get(['dentist_id', 'appointment_date', 'appointment_time'])
+                ->map(fn ($appointment) => [
+                    'dentist_id' => $appointment->dentist_id,
+                    'appointment_date' => $appointment->appointment_date->format('Y-m-d'),
+                    'appointment_time' => $appointment->appointment_time,
+                ]),
         ]);
     }
 
     public function getDentists()
     {
-        // Redirect to login if not authenticated
-        if (!auth()->check()) {
+        $gate = $this->guardPatientBookingAccess();
+
+        if ($gate instanceof Response) {
+            return $gate;
+        }
+
+        if (! auth()->check()) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -93,8 +108,13 @@ class AppointmentController extends Controller
 
     public function getAvailableTimes(Request $request)
     {
-        // Redirect to login if not authenticated
-        if (!auth()->check()) {
+        $gate = $this->guardPatientBookingAccess();
+
+        if ($gate instanceof Response) {
+            return $gate;
+        }
+
+        if (! auth()->check()) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -105,7 +125,22 @@ class AppointmentController extends Controller
             return response()->json(['error' => 'Missing parameters'], 400);
         }
 
-        // Get all appointments for this dentist on this date
+        $dentist = Dentist::with('user')->find($dentistId);
+
+        if (! $dentist) {
+            return response()->json(['error' => 'Dentist not found'], 404);
+        }
+
+        $unavailableReason = AppointmentAvailability::unavailableReason($dentist, $date);
+
+        if ($unavailableReason) {
+            return response()->json([
+                'available_times' => [],
+                'booked_times' => [],
+                'unavailable_reason' => $unavailableReason,
+            ]);
+        }
+
         $bookedTimes = Appointment::where('dentist_id', $dentistId)
             ->whereDate('appointment_date', $date)
             ->where('status', '!=', 'cancelled')
@@ -121,11 +156,18 @@ class AppointmentController extends Controller
         return response()->json([
             'available_times' => $timeSlots,
             'booked_times' => $bookedTimes,
+            'unavailable_reason' => null,
         ]);
     }
 
     public function storePublic(Request $request)
     {
+        $gate = $this->guardPatientBookingAccess();
+
+        if ($gate instanceof RedirectResponse) {
+            return $gate;
+        }
+
         // Validate all incoming form data
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -168,17 +210,18 @@ class AppointmentController extends Controller
             ]);
         }
 
-        // Verify the requested time slot is still available
-        // Check against other confirmed/scheduled appointments to prevent double-booking
-        $existingAppointment = Appointment::where('dentist_id', $validated['dentist_id'])
-            ->whereDate('appointment_date', $validated['appointment_date'])
-            ->where('appointment_time', $validated['appointment_time'])
-            ->where('status', '!=', 'cancelled')  // Ignore cancelled appointments
-            ->first();
+        $dentist = Dentist::with('user')->findOrFail($validated['dentist_id']);
+        $reason = AppointmentAvailability::unavailableReason(
+            $dentist,
+            $validated['appointment_date'],
+            $validated['appointment_time']
+        );
 
-        if ($existingAppointment) {
-            // Time slot was taken by another booking, reject this request
-            return back()->withErrors(['appointment_time' => 'This time slot is no longer available. Please choose another.']);
+        if ($reason) {
+            return back()->withErrors([
+                'appointment_time' => $reason,
+                'dentist_id' => $reason,
+            ]);
         }
 
         // Create the appointment record with initial status
@@ -202,6 +245,12 @@ class AppointmentController extends Controller
 
     public function confirmation(Appointment $appointment)
     {
+        $gate = $this->guardPatientBookingAccess();
+
+        if ($gate instanceof RedirectResponse) {
+            return $gate;
+        }
+
         $patient = $appointment->patient;
         
         return Inertia::render('Appointments/Confirmation', [
@@ -254,5 +303,29 @@ class AppointmentController extends Controller
             new PatientAppointmentsExport($patient->id),
             'my-appointments-' . now()->format('Y-m-d-His') . '.xlsx'
         );
+    }
+
+    private function guardPatientBookingAccess(): RedirectResponse|Response|null
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return null;
+        }
+
+        if ($user->role === 'patient') {
+            return null;
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'error' => 'Only patient accounts can access the self-booking flow.',
+                'redirect' => route('dashboard'),
+            ], 403);
+        }
+
+        return redirect()
+            ->route('dashboard')
+            ->with('error', 'Only patient accounts can use the self-booking page. You were returned to your dashboard.');
     }
 }

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Patient;
 
-use Illuminate\Routing\Controller;
-use Inertia\Inertia;
-use Carbon\Carbon;
+use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Notification;
+use Carbon\Carbon;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -15,20 +16,21 @@ class DashboardController extends Controller
         $patient = $user->patient;
 
         $nextAppointment = null;
-        $notifications = [];
+        $notifications = collect();
 
         if ($patient) {
             $nextAppointment = Appointment::where('patient_id', $patient->id)
+                ->where('status', '!=', 'cancelled')
                 ->where('appointment_date', '>=', Carbon::today())
                 ->with('dentist.user')
                 ->orderBy('appointment_date')
+                ->orderBy('appointment_time')
                 ->first();
 
-            // Generate mock notifications
-            $notifications = [
-                ['type' => 'reminder', 'message' => 'Your appointment is in 2 days'],
-                ['type' => 'alert', 'message' => 'You have pending treatment follow-up'],
-            ];
+            $notifications = Notification::where('user_id', $user->id)
+                ->latest()
+                ->limit(5)
+                ->get();
         }
 
         return Inertia::render('Patient/Dashboard', [

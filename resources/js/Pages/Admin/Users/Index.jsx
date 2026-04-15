@@ -1,17 +1,15 @@
 import AdminLayout from '@/Layouts/AdminLayout'
-import { Link, usePage, router } from '@inertiajs/react'
-import { useState, useMemo } from 'react'
+import { Link, router } from '@inertiajs/react'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function UsersIndex({ users, filters }) {
-    const { url } = usePage()
     const [activeTab, setActiveTab] = useState(filters?.role || 'all')
     const [searchQuery, setSearchQuery] = useState('')
     const [isDeleting, setIsDeleting] = useState(null)
-    const [notification, setNotification] = useState(null)
+    const [statusOverrides, setStatusOverrides] = useState({})
+    const [pendingStatusIds, setPendingStatusIds] = useState([])
 
-    const getInitials = (name) => {
-        return name.split(' ').map(n => n[0]).join('').toUpperCase()
-    }
+    const getInitials = (name) => name.split(' ').map((part) => part[0]).join('').toUpperCase()
 
     const getAvatarColor = (role) => {
         const colors = {
@@ -20,52 +18,56 @@ export default function UsersIndex({ users, filters }) {
             staff: 'bg-orange-400',
             patient: 'bg-green-400',
         }
+
         return colors[role] || colors.patient
     }
 
-    const handleStatusChange = (userId, currentStatus, userName) => {
+    useEffect(() => {
+        setStatusOverrides({})
+    }, [users.data])
+
+    const handleStatusChange = (userId, currentStatus) => {
+        const nextStatus = !currentStatus
+
+        setStatusOverrides((current) => ({
+            ...current,
+            [userId]: nextStatus,
+        }))
+        setPendingStatusIds((current) => [...new Set([...current, userId])])
+
         router.put(`/admin/users/${userId}`, {
-            active: !currentStatus,
+            active: nextStatus,
+            role: activeTab === 'all' ? 'all' : activeTab,
         }, {
-            onSuccess: () => {
-                setNotification({
-                    type: 'success',
-                    message: `${userName} has been ${!currentStatus ? 'activated' : 'deactivated'} successfully.`
+            async: true,
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            showProgress: false,
+            only: ['users', 'filters'],
+            onError: () => {
+                setStatusOverrides((current) => {
+                    const updated = { ...current }
+                    delete updated[userId]
+                    return updated
                 })
-                setTimeout(() => setNotification(null), 3000)
             },
-            onError: (errors) => {
-                setNotification({
-                    type: 'error',
-                    message: 'Failed to update user status. Please try again.'
-                })
-                setTimeout(() => setNotification(null), 3000)
-            }
+            onFinish: () => {
+                setPendingStatusIds((current) => current.filter((id) => id !== userId))
+            },
         })
     }
 
     const handleDelete = (userId, userName) => {
-        if (confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
-            setIsDeleting(userId)
-            router.delete(`/admin/users/${userId}`, {
-                onSuccess: () => {
-                    setNotification({
-                        type: 'success',
-                        message: `${userName} has been deleted successfully.`
-                    })
-                    setIsDeleting(null)
-                    setTimeout(() => setNotification(null), 3000)
-                },
-                onError: (errors) => {
-                    setIsDeleting(null)
-                    setNotification({
-                        type: 'error',
-                        message: errors.message || 'Failed to delete user. Please try again.'
-                    })
-                    setTimeout(() => setNotification(null), 3000)
-                }
-            })
+        if (!confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+            return
         }
+
+        setIsDeleting(userId)
+        router.delete(`/admin/users/${userId}`, {
+            preserveScroll: true,
+            onFinish: () => setIsDeleting(null),
+        })
     }
 
     const tabs = [
@@ -78,19 +80,25 @@ export default function UsersIndex({ users, filters }) {
 
     const handleTabChange = (tabId) => {
         setActiveTab(tabId)
-        const role = tabId === 'all' ? 'all' : tabId
-        router.get(`/admin/users?role=${role}`)
         setSearchQuery('')
+
+        const role = tabId === 'all' ? 'all' : tabId
+        router.get(`/admin/users?role=${role}`, {}, {
+            async: true,
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            showProgress: false,
+            only: ['users', 'filters'],
+        })
     }
 
-    // Filter users based on tab and search query
     const filteredUsers = useMemo(() => {
         let filtered = users.data || []
 
-        // Filter by search query (since server already filtered by role)
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase()
-            filtered = filtered.filter(user =>
+            filtered = filtered.filter((user) =>
                 user.name.toLowerCase().includes(query) ||
                 user.email.toLowerCase().includes(query) ||
                 user.role.toLowerCase().includes(query)
@@ -102,24 +110,6 @@ export default function UsersIndex({ users, filters }) {
 
     return (
         <div className="space-y-6">
-            {/* Notification */}
-            {notification && (
-                <div className={`px-4 py-3 rounded-lg flex items-center justify-between ${
-                    notification.type === 'success'
-                        ? 'bg-green-100 text-green-800 border border-green-300'
-                        : 'bg-red-100 text-red-800 border border-red-300'
-                }`}>
-                    <span>{notification.message}</span>
-                    <button
-                        onClick={() => setNotification(null)}
-                        className="text-current hover:opacity-70"
-                    >
-                        ✕
-                    </button>
-                </div>
-            )}
-
-            {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-1">User Management</h1>
@@ -132,30 +122,25 @@ export default function UsersIndex({ users, filters }) {
                 </Link>
             </div>
 
-            {/* Tabs and Search */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-200">
-                    {/* Tabs */}
                     <div className="flex gap-8 mb-4">
-                        {tabs.map(tab => (
+                        {tabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => handleTabChange(tab.id)}
                                 className={`pb-3 font-medium transition-colors relative ${
-                                    activeTab === tab.id
-                                        ? 'text-teal-600'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    activeTab === tab.id ? 'text-teal-600' : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             >
                                 {tab.label}
                                 {activeTab === tab.id && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-600"></div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-600" />
                                 )}
                             </button>
                         ))}
                     </div>
 
-                    {/* Search Bar */}
                     <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200 focus-within:border-teal-500 focus-within:bg-white transition-all">
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -164,7 +149,7 @@ export default function UsersIndex({ users, filters }) {
                             type="text"
                             placeholder="Search by name, email or role..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(event) => setSearchQuery(event.target.value)}
                             className="bg-transparent border-0 focus:outline-none text-sm flex-1 placeholder-gray-400 text-gray-900"
                         />
                         {searchQuery && (
@@ -180,7 +165,6 @@ export default function UsersIndex({ users, filters }) {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-gray-50 border-b border-gray-200">
@@ -195,12 +179,12 @@ export default function UsersIndex({ users, filters }) {
                         </thead>
                         <tbody>
                             {filteredUsers.length > 0 ? (
-                                filteredUsers.map((user) => (
-                                    <tr
-                                        key={user.id}
-                                        className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                                    >
-                                        {/* Name with Avatar */}
+                                filteredUsers.map((user) => {
+                                    const isActive = statusOverrides[user.id] ?? user.active
+                                    const isPending = pendingStatusIds.includes(user.id)
+
+                                    return (
+                                        <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className={`w-10 h-10 ${getAvatarColor(user.role)} rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
@@ -210,51 +194,46 @@ export default function UsersIndex({ users, filters }) {
                                             </div>
                                         </td>
 
-                                        {/* Role Badge */}
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                                                 user.role === 'admin'
                                                     ? 'bg-blue-100 text-blue-700'
                                                     : user.role === 'dentist'
-                                                    ? 'bg-purple-100 text-purple-700'
-                                                    : user.role === 'staff'
-                                                    ? 'bg-orange-100 text-orange-700'
-                                                    : 'bg-green-100 text-green-700'
+                                                        ? 'bg-purple-100 text-purple-700'
+                                                        : user.role === 'staff'
+                                                            ? 'bg-orange-100 text-orange-700'
+                                                            : 'bg-green-100 text-green-700'
                                             }`}>
                                                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                                             </span>
                                         </td>
 
-                                        {/* Email */}
                                         <td className="px-6 py-4 text-gray-600">{user.email}</td>
-
-                                        {/* Last Login */}
                                         <td className="px-6 py-4 text-gray-600 text-sm">{user.last_login || 'Never'}</td>
 
-                                        {/* Status Toggle */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => handleStatusChange(user.id, user.active, user.name)}
+                                                    type="button"
+                                                    disabled={isPending}
+                                                    onClick={() => handleStatusChange(user.id, isActive)}
                                                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                                        user.active ? 'bg-teal-500' : 'bg-gray-300'
-                                                    }`}
+                                                        isActive ? 'bg-teal-500' : 'bg-gray-300'
+                                                    } ${isPending ? 'cursor-default' : ''}`}
+                                                    aria-label={`Set ${user.name} as ${isActive ? 'inactive' : 'active'}`}
                                                 >
                                                     <span
                                                         className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                                            user.active ? 'translate-x-6' : 'translate-x-1'
+                                                            isActive ? 'translate-x-6' : 'translate-x-1'
                                                         }`}
                                                     />
                                                 </button>
-                                                <span className={`text-xs font-medium ${
-                                                    user.active ? 'text-teal-600' : 'text-gray-500'
-                                                }`}>
-                                                    {user.active ? 'Active' : 'Inactive'}
+                                                <span className={`text-xs font-medium ${isActive ? 'text-teal-600' : 'text-gray-500'}`}>
+                                                    {isActive ? 'Active' : 'Inactive'}
                                                 </span>
                                             </div>
                                         </td>
 
-                                        {/* Actions */}
                                         <td className="px-6 py-4 flex gap-3">
                                             <Link
                                                 href={`/admin/users/${user.id}/edit`}
@@ -276,8 +255,9 @@ export default function UsersIndex({ users, filters }) {
                                                 </svg>
                                             </button>
                                         </td>
-                                    </tr>
-                                ))
+                                        </tr>
+                                    )
+                                })
                             ) : (
                                 <tr>
                                     <td colSpan="6" className="px-6 py-12 text-center">
@@ -295,7 +275,6 @@ export default function UsersIndex({ users, filters }) {
                     </table>
                 </div>
 
-                {/* Pagination */}
                 {filteredUsers.length > 0 && (
                     <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                         <span className="text-sm text-gray-600">

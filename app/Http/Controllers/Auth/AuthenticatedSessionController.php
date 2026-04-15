@@ -36,17 +36,7 @@ class AuthenticatedSessionController extends Controller
         // Track last login
         auth()->user()->update(['last_login' => now()]);
 
-        // Role-based redirect
-        $user = auth()->user();
-        $redirect = match ($user->role) {
-            'admin' => '/admin/dashboard',
-            'dentist' => '/dentist/dashboard',
-            'staff' => '/staff/dashboard',
-            'patient' => '/patient/dashboard',
-            default => '/',
-        };
-
-        return redirect($redirect);
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**

@@ -1,23 +1,19 @@
 export default function StatCard({ label, value, change, icon }) {
-    const isPositive = change && change > 0
+    const isPositive = change === undefined ? null : change >= 0
 
     return (
-        <div className="bg-white rounded-lg border-l-4 border-teal-500 p-6 shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer">
-            <div className="flex items-start justify-between">
+        <div className="dcms-card">
+            <div className="flex items-start justify-between p-6">
                 <div>
-                    <p className="text-sm text-gray-500 mb-2">{label}</p>
-                    <p className="text-3xl font-bold text-gray-900">{value}</p>
+                    <p className="mb-2 text-sm text-[var(--dcms-text-soft)]">{label}</p>
+                    <p className="text-3xl font-bold text-[var(--dcms-text)]">{value}</p>
                     {change !== undefined && (
-                        <p className={`text-sm mt-2 font-medium ${isPositive ? 'text-teal-600' : 'text-red-600'}`}>
-                            {isPositive ? '↑' : '↓'} {Math.abs(change)}% {isPositive ? 'vs yesterday' : 'vs yesterday'}
+                        <p className={`mt-2 text-sm font-semibold italic ${isPositive ? 'text-amber-600' : 'text-red-600'}`}>
+                            {isPositive ? 'Up' : 'Down'} {Math.abs(change)}% vs prior period
                         </p>
                     )}
                 </div>
-                {icon && (
-                    <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-lg group-hover:bg-teal-200 transition-colors">
-                        {icon}
-                    </div>
-                )}
+                {icon && <div className="dcms-icon-badge">{icon}</div>}
             </div>
         </div>
     )

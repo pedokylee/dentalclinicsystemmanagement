@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TreatmentRecord extends Model
 {
@@ -37,5 +38,10 @@ class TreatmentRecord extends Model
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TreatmentRecordAttachment::class);
     }
 }

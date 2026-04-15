@@ -45,12 +45,30 @@ class PatientController extends Controller
 
         $treatmentHistory = $patient->treatmentRecords()
             ->where('dentist_id', $dentist->id)
+            ->with('attachments')
             ->orderBy('visit_date', 'desc')
             ->get();
+
+        $appointments = Appointment::where('patient_id', $patient->id)
+            ->where('dentist_id', $dentist->id)
+            ->with('dentist.user')
+            ->orderByDesc('appointment_date')
+            ->get();
+
+        $xrays = $treatmentHistory
+            ->flatMap(fn ($record) => $record->attachments->where('type', 'xray'))
+            ->values();
+
+        $prescriptions = $treatmentHistory
+            ->filter(fn ($record) => filled($record->prescription))
+            ->values();
 
         return Inertia::render('Dentist/Patients/Show', [
             'patient' => $patient,
             'treatmentHistory' => $treatmentHistory,
+            'appointments' => $appointments,
+            'xrays' => $xrays,
+            'prescriptions' => $prescriptions,
         ]);
     }
 

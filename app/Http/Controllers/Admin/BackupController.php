@@ -10,6 +10,13 @@ use App\Models\AuditLog;
 
 class BackupController extends Controller
 {
+    private function backupPath(string $fileName): string
+    {
+        abort_unless(preg_match('/^backup_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.sqlite$/', $fileName), 404);
+
+        return storage_path("app/backups/{$fileName}");
+    }
+
     public function index()
     {
         $backups = [];
@@ -116,8 +123,8 @@ class BackupController extends Controller
     public function show($id)
     {
         try {
-            $backupPath = storage_path("app/backups/{$id}");
-            
+            $backupPath = $this->backupPath($id);
+
             if (!file_exists($backupPath)) {
                 return back()->with('error', 'Backup file not found.');
             }
@@ -130,11 +137,37 @@ class BackupController extends Controller
         }
     }
 
+    public function update(string $backup)
+    {
+        try {
+            $backupPath = $this->backupPath($backup);
+            $databasePath = database_path('database.sqlite');
+
+            if (!file_exists($backupPath)) {
+                return back()->with('error', 'Backup file not found.');
+            }
+
+            if (!file_exists($databasePath)) {
+                touch($databasePath);
+            }
+
+            if (!@copy($backupPath, $databasePath)) {
+                return back()->with('error', 'Failed to restore backup.');
+            }
+
+            AuditLog::log('restored', 'backups', "Restored backup: {$backup}");
+
+            return redirect()->route('admin.backup.index')->with('success', 'Backup restored successfully.');
+        } catch (\Throwable $exception) {
+            return back()->with('error', 'Failed to restore backup: ' . $exception->getMessage());
+        }
+    }
+
     public function destroy($id)
     {
         try {
-            $backupPath = storage_path("app/backups/{$id}");
-            
+            $backupPath = $this->backupPath($id);
+
             if (!file_exists($backupPath)) {
                 return back()->with('error', 'Backup file not found.');
             }

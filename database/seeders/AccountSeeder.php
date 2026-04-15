@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Dentist;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,7 +14,6 @@ class AccountSeeder extends Seeder
      */
     public function run(): void
     {
-        // ===== ADMIN ACCOUNT =====
         User::create([
             'name' => 'Admin Garcia',
             'email' => 'admin@dcms.com',
@@ -24,7 +22,6 @@ class AccountSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        // ===== DENTIST ACCOUNTS =====
         $dentist1User = User::create([
             'name' => 'Dr. Maria Cruz',
             'email' => 'mcruz@dcms.com',
@@ -53,7 +50,6 @@ class AccountSeeder extends Seeder
             'schedule_days' => json_encode(['Monday', 'Wednesday', 'Friday', 'Saturday']),
         ]);
 
-        // ===== STAFF ACCOUNTS =====
         User::create([
             'name' => 'Ana Sta. Maria',
             'email' => 'staff@dcms.com',
@@ -78,7 +74,6 @@ class AccountSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        // ===== PATIENT ACCOUNTS =====
         $patientAccounts = [
             ['Juan', 'Santos', 'juan.santos@patient.com'],
             ['Maria', 'Garcia', 'maria.garcia@patient.com'],
@@ -102,7 +97,7 @@ class AccountSeeder extends Seeder
 
         foreach ($patientAccounts as [$firstName, $lastName, $email]) {
             User::create([
-                'name' => "$firstName $lastName",
+                'name' => "{$firstName} {$lastName}",
                 'email' => $email,
                 'password' => Hash::make('password'),
                 'role' => 'patient',
@@ -110,7 +105,7 @@ class AccountSeeder extends Seeder
             ]);
         }
 
-        echo "\n✅ Accounts seeded!\n";
-        echo "👥 Created: 1 Admin, 2 Dentists, 3 Staff, 18 Patients (24 users total)\n\n";
+        echo "\nAccounts seeded successfully.\n";
+        echo "Created: 1 Admin, 2 Dentists, 3 Staff, 18 Patients (24 users total)\n\n";
     }
 }

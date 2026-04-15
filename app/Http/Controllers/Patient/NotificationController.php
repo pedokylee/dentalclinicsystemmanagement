@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Patient;
 use App\Models\Notification;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
-use Illuminate\Http\Request;
-
 class NotificationController extends Controller
 {
     public function index()
@@ -37,7 +35,7 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
-        return back()->with('success', 'Notification marked as read');
+        return redirect()->back(303);
     }
 
     public function markAllAsRead()
@@ -48,7 +46,7 @@ class NotificationController extends Controller
             ->where('read', false)
             ->update(['read' => true]);
 
-        return back()->with('success', 'All notifications marked as read');
+        return redirect()->back(303);
     }
 
     public function destroy(Notification $notification)
@@ -61,7 +59,7 @@ class NotificationController extends Controller
 
         $notification->delete();
 
-        return back()->with('success', 'Notification deleted');
+        return redirect()->back(303);
     }
 
     /**

@@ -2,68 +2,52 @@ import DentistLayout from '@/Layouts/DentistLayout'
 import { Link } from '@inertiajs/react'
 
 export default function PatientsIndex({ patients }) {
-    const handleExportPdf = () => {
-        window.location.href = route('dentist.patients.export-pdf')
-    }
-
-    const handleExportExcel = () => {
-        window.location.href = route('dentist.patients.export-excel')
-    }
-
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-[#E2FAF7]">My Patients</h1>
-                <div className="flex gap-2">
-                    <button 
-                        onClick={handleExportPdf}
-                        className="px-4 py-2 bg-[#0D9488] text-white rounded hover:bg-[#14B8A6] transition-colors text-sm"
-                    >
-                        Export PDF
-                    </button>
-                    <button 
-                        onClick={handleExportExcel}
-                        className="px-4 py-2 bg-[#F59E0B] text-white rounded hover:bg-opacity-80 transition-colors text-sm"
-                    >
-                        Export Excel
-                    </button>
+        <div className="dcms-page">
+            <div className="dcms-page-header">
+                <div>
+                    <h1 className="dcms-page-title">My Patients</h1>
+                    <p className="dcms-page-subtitle">Only patients assigned to your care are visible here.</p>
+                </div>
+                <div className="flex gap-3">
+                    <a href={route('dentist.patients.export-pdf')} className="dcms-btn-gold">Export PDF</a>
+                    <a href={route('dentist.patients.export-excel')} className="dcms-btn-secondary">Export Excel</a>
                 </div>
             </div>
 
-            <div className="bg-[#0E2C28] border border-[rgba(45,212,191,0.12)] rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                    <thead className="bg-[#0F2724] border-b border-[rgba(45,212,191,0.12)]">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-[#0D9488]">Name</th>
-                            <th className="px-6 py-3 text-left text-[#0D9488]">Age</th>
-                            <th className="px-6 py-3 text-left text-[#0D9488]">Contact</th>
-                            <th className="px-6 py-3 text-left text-[#0D9488]">Medical Alerts</th>
-                            <th className="px-6 py-3 text-left text-[#0D9488]">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {patients.data.map((patient) => (
-                            <tr key={patient.id} className="border-b hover:bg-[#0F2724] text-[#E2FAF7]">
-                                <td className="px-6 py-3">{patient.full_name}</td>
-                                <td className="px-6 py-3">{patient.age}</td>
-                                <td className="px-6 py-3">{patient.contact_number}</td>
-                                <td className="px-6 py-3">
-                                    {patient.medical_alerts && (
-                                        <span className="px-3 py-1 bg-red-600 text-white rounded text-xs">
-                                            {patient.medical_alerts}
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="px-6 py-3">
-                                    <Link href={`/dentist/patients/${patient.id}`} className="text-[#0D9488] hover:text-[#14B8A6]">
-                                        View
-                                    </Link>
-                                </td>
+            <section className="dcms-card">
+                <div className="overflow-x-auto">
+                    <table className="dcms-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Last Visit</th>
+                                <th>Medical Alerts</th>
+                                <th>Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {patients.data.map((patient) => (
+                                <tr key={patient.id}>
+                                    <td className="font-semibold">{patient.full_name}</td>
+                                    <td>{patient.age}</td>
+                                    <td>{patient.updated_at ? new Date(patient.updated_at).toLocaleDateString() : 'N/A'}</td>
+                                    <td>
+                                        {patient.medical_alerts ? <span className="dcms-chip-gold">{patient.medical_alerts}</span> : <span className="dcms-chip-slate">None</span>}
+                                    </td>
+                                    <td>
+                                        <div className="flex gap-3">
+                                            <Link href={`/dentist/patients/${patient.id}`} className="text-sm font-semibold text-[var(--dcms-primary)]">View Profile</Link>
+                                            <Link href={`/dentist/treatment/create?patient_id=${patient.id}`} className="text-sm font-semibold text-[var(--dcms-gold)] italic">Add Treatment</Link>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     )
 }

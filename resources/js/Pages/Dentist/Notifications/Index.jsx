@@ -1,127 +1,113 @@
-import DentistLayout from '@/Layouts/DentistLayout'
+import { Link, router } from '@inertiajs/react';
+import { Bell, CheckCheck, Clock3, Trash2 } from 'lucide-react';
+import DentistLayout from '@/Layouts/DentistLayout';
+
+const palette = {
+    appointment_cancelled: 'border-red-200 bg-red-50',
+    appointment_booked: 'border-teal-200 bg-teal-50',
+    appointment_confirmed: 'border-teal-200 bg-teal-50',
+    appointment_reminder: 'border-amber-200 bg-amber-50',
+};
+
+const refreshOptions = {
+    preserveState: true,
+    preserveScroll: true,
+    replace: true,
+    only: ['notifications', 'unreadCount', 'auth'],
+};
 
 export default function NotificationsIndex({ notifications, unreadCount }) {
-    const { data, links } = notifications
+    const markAllAsRead = () => {
+        router.post('/dentist/notifications/mark-all-read', {}, refreshOptions);
+    };
 
-    const getNotificationIcon = (type) => {
-        switch (type) {
-            case 'appointment_cancelled':
-                return '❌'
-            case 'appointment_booked':
-                return '✅'
-            case 'appointment_confirmed':
-                return '✅'
-            case 'appointment_reminder':
-                return '⏰'
-            default:
-                return '📢'
-        }
-    }
+    const markAsRead = (id) => {
+        router.patch(`/dentist/notifications/${id}/read`, {}, refreshOptions);
+    };
 
-    const getNotificationColor = (type) => {
-        switch (type) {
-            case 'appointment_cancelled':
-                return 'border-l-red-500 bg-red-50'
-            case 'appointment_booked':
-                return 'border-l-green-500 bg-green-50'
-            case 'appointment_confirmed':
-                return 'border-l-green-500 bg-green-50'
-            case 'appointment_reminder':
-                return 'border-l-yellow-500 bg-yellow-50'
-            default:
-                return 'border-l-blue-500 bg-blue-50'
-        }
-    }
+    const dismiss = (id) => {
+        router.delete(`/dentist/notifications/${id}`, refreshOptions);
+    };
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
+        <div className="dcms-page">
+            <div className="dcms-page-header">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#E2FAF7]">Notifications</h1>
-                    {unreadCount > 0 && (
-                        <p className="text-sm text-[#0D9488] mt-1">
-                            {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-                        </p>
-                    )}
+                    <h1 className="dcms-page-title">Notifications</h1>
+                    <p className="dcms-page-subtitle">
+                        {unreadCount} unread notification{unreadCount === 1 ? '' : 's'} related to schedule changes, reminders, and patient bookings.
+                    </p>
                 </div>
                 {unreadCount > 0 && (
-                    <button
-                        className="px-4 py-2 bg-[#0D9488] text-white rounded hover:bg-[#14B8A6] transition-colors text-sm"
-                    >
-                        Mark all as read
+                    <button className="dcms-btn-primary" onClick={markAllAsRead}>
+                        Mark All as Read
                     </button>
                 )}
             </div>
 
-            {/* Notifications List */}
-            <div className="space-y-3">
-                {data && data.length > 0 ? (
-                    data.map((notification) => (
-                        <div
-                            key={notification.id}
-                            className={`border-l-4 p-4 rounded-lg transition-all ${getNotificationColor(notification.type)} ${
-                                !notification.read ? 'opacity-100 ring-1 ring-offset-2 ring-[#0D9488]' : 'opacity-75'
-                            }`}
-                        >
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1 flex items-start gap-3">
-                                    <span className="text-2xl mt-0.5">
-                                        {getNotificationIcon(notification.type)}
-                                    </span>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">
-                                            {notification.title}
-                                        </h3>
-                                        <p className="text-gray-700 mt-1">
-                                            {notification.message}
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-2">
-                                            {new Date(notification.created_at).toLocaleDateString()} at{' '}
-                                            {new Date(notification.created_at).toLocaleTimeString()}
-                                        </p>
-                                    </div>
+            <div className="space-y-4">
+                {notifications.data.length > 0 ? notifications.data.map((notification) => (
+                    <section
+                        key={notification.id}
+                        className={`rounded-2xl border p-5 ${palette[notification.type] ?? 'border-slate-200 bg-slate-50'} ${!notification.read ? 'ring-1 ring-[var(--dcms-primary)]/20' : ''}`}
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--dcms-primary)] text-white">
+                                    {notification.type === 'appointment_reminder' ? <Clock3 className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
                                 </div>
+                                <div>
+                                    <p className="font-semibold text-[var(--dcms-text)]">{notification.title}</p>
+                                    <p className="mt-1 text-sm text-[var(--dcms-text-soft)]">{notification.message}</p>
+                                    <p className="mt-3 text-xs uppercase tracking-[0.16em] text-[var(--dcms-text-soft)]">
+                                        {new Date(notification.created_at).toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                {!notification.read && (
+                                    <button className="dcms-btn-secondary !px-3 !py-2" onClick={() => markAsRead(notification.id)}>
+                                        <CheckCheck className="h-4 w-4" />
+                                    </button>
+                                )}
                                 <button
-                                    className="text-gray-500 hover:text-gray-700 text-lg"
-                                    title="Delete"
+                                    className="dcms-btn-secondary !border-red-200 !text-red-600 !px-3 !py-2 hover:!bg-red-50"
+                                    onClick={() => dismiss(notification.id)}
                                 >
-                                    ✕
+                                    <Trash2 className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                    ))
-                ) : (
-                    <div className="text-center py-12">
-                        <p className="text-[#92A9B4] text-lg">No notifications yet</p>
-                        <p className="text-[#5A7A82] text-sm mt-1">
-                            You'll see updates about your appointments here
-                        </p>
-                    </div>
+                    </section>
+                )) : (
+                    <section className="dcms-card">
+                        <div className="dcms-card-body text-center text-[var(--dcms-text-soft)]">No notifications yet.</div>
+                    </section>
                 )}
             </div>
 
-            {/* Pagination */}
-            {links && links.length > 1 && (
-                <div className="flex justify-center gap-1 mt-6">
-                    {links.map((link) => (
-                        <a
-                            key={link.label}
-                            href={link.url || '#'}
-                            className={`px-3 py-2 rounded text-sm ${
-                                link.active
-                                    ? 'bg-[#0D9488] text-white'
-                                    : link.url
-                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
+            {notifications.links?.length > 1 && (
+                <div className="mt-6 flex justify-center gap-1">
+                    {notifications.links.map((link) =>
+                        link.url ? (
+                            <Link
+                                key={link.label}
+                                href={link.url}
+                                className={`rounded px-3 py-2 text-sm ${link.active ? 'bg-[var(--dcms-primary)] text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        ) : (
+                            <span
+                                key={link.label}
+                                className="cursor-not-allowed rounded bg-slate-100 px-3 py-2 text-sm text-slate-400"
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            />
+                        )
+                    )}
                 </div>
             )}
         </div>
-    )
+    );
 }
 
-NotificationsIndex.layout = (page) => <DentistLayout>{page}</DentistLayout>
+NotificationsIndex.layout = (page) => <DentistLayout>{page}</DentistLayout>;

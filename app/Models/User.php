@@ -7,25 +7,32 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    public function dentist()
+    public function dentist(): HasOne
     {
         return $this->hasOne(\App\Models\Dentist::class);
     }
 
-    public function patient()
+    public function patient(): HasOne
     {
         return $this->hasOne(\App\Models\Patient::class);
     }
 
-    public function auditLogs()
+    public function auditLogs(): HasMany
     {
         return $this->hasMany(\App\Models\AuditLog::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(\App\Models\Notification::class);
     }
 
     public function isAdmin(): bool

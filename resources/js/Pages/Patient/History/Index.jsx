@@ -2,39 +2,35 @@ import PatientLayout from '@/Layouts/PatientLayout'
 
 export default function HistoryIndex({ records }) {
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-[#E2FAF7]">Treatment History</h1>
+        <div className="dcms-page">
+            <div>
+                <h1 className="dcms-page-title">My Treatment History</h1>
+                <p className="dcms-page-subtitle">Review your full visit timeline and download a PDF record for each completed treatment.</p>
+            </div>
 
             <div className="space-y-4">
-                {records.data.length === 0 ? (
-                    <div className="text-center py-8 text-[#7ABFB9]">No treatment records available</div>
-                ) : (
-                    records.data.map((record) => (
-                        <div key={record.id} className="bg-[#0E2C28] border border-[rgba(45,212,191,0.12)] p-6 rounded">
-                            <div className="flex justify-between items-start mb-4">
+                {records.data.length > 0 ? records.data.map((record) => (
+                    <section key={record.id} className="dcms-card">
+                        <div className="dcms-card-body">
+                            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                                 <div>
-                                    <p className="font-bold text-[#E2FAF7]">{record.visit_date}</p>
-                                    <p className="text-[#7ABFB9]">Dr. {record.dentist.user.name}</p>
-                                </div>
-                                <button className="px-4 py-2 bg-[#0D9488] text-white rounded hover:bg-[#14B8A6]">
-                                    Download PDF
-                                </button>
-                            </div>
-                            {record.procedures && (
-                                <div className="mb-3">
-                                    <p className="text-sm text-[#0D9488] mb-2">Procedures:</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {record.procedures.map((proc, idx) => (
-                                            <span key={idx} className="px-3 py-1 bg-[#0D9488] bg-opacity-20 text-[#0D9488] rounded text-sm">
-                                                {proc}
-                                            </span>
+                                    <p className="text-lg font-semibold">{record.visit_date}</p>
+                                    <p className="mt-1 text-sm text-[var(--dcms-text-soft)]">Dr. {record.dentist.user.name}</p>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        {(record.procedures || []).map((procedure) => (
+                                            <span key={procedure} className="dcms-chip-teal">{procedure}</span>
                                         ))}
                                     </div>
+                                    <p className="mt-3 text-sm text-[var(--dcms-text-soft)]">{record.notes || 'No notes were added for this visit.'}</p>
                                 </div>
-                            )}
-                            {record.notes && <p className="text-sm text-[#7ABFB9]">{record.notes}</p>}
+                                <a href={`/patient/history/${record.id}/download`} className="dcms-btn-secondary">Download PDF</a>
+                            </div>
                         </div>
-                    ))
+                    </section>
+                )) : (
+                    <section className="dcms-card">
+                        <div className="dcms-card-body text-center text-[var(--dcms-text-soft)]">No treatment history is available yet.</div>
+                    </section>
                 )}
             </div>
         </div>

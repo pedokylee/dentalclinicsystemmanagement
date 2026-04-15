@@ -4,21 +4,41 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\AuditLog;
 use App\Exports\AuditLogsExport;
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AuditLogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $logs = AuditLog::with('user')
+        $logsQuery = AuditLog::with('user')
             ->orderBy('created_at', 'desc')
+            ->when($request->filled('user'), function ($query) use ($request) {
+                $query->whereHas('user', function ($userQuery) use ($request) {
+                    $userQuery->where('name', 'like', '%' . $request->string('user')->trim() . '%');
+                });
+            })
+            ->when($request->filled('module'), function ($query) use ($request) {
+                $query->where('module', 'like', '%' . $request->string('module')->trim() . '%');
+            })
+            ->when($request->filled('startDate'), function ($query) use ($request) {
+                $query->whereDate('created_at', '>=', $request->string('startDate')->toString());
+            })
+            ->when($request->filled('endDate'), function ($query) use ($request) {
+                $query->whereDate('created_at', '<=', $request->string('endDate')->toString());
+            });
+
+        $logs = $logsQuery
             ->paginate(config('app.pagination.audit_logs'))
             ->withQueryString();
 
-        return Inertia::render('Admin/AuditLog', ['logs' => $logs]);
+        return Inertia::render('Admin/AuditLog', [
+            'logs' => $logs,
+            'filters' => $request->only(['user', 'module', 'startDate', 'endDate']),
+        ]);
     }
 
     public function exportPdf()

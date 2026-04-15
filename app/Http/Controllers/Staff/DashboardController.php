@@ -6,6 +6,8 @@ use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use App\Models\Appointment;
+use App\Models\PatientInquiry;
+use App\Support\PatientInquiryFeature;
 
 class DashboardController extends Controller
 {
@@ -41,6 +43,9 @@ class DashboardController extends Controller
         $remindersToSend = Appointment::where('appointment_date', $tomorrow)
             ->where('status', '!=', 'cancelled')
             ->count();
+        $pendingInquiries = PatientInquiryFeature::isAvailable()
+            ? PatientInquiry::where('status', 'pending_verification')->count()
+            : 0;
 
         return Inertia::render('Staff/Dashboard', [
             'todayCheckIns' => $todayCheckIns,
@@ -49,6 +54,7 @@ class DashboardController extends Controller
             'walkInCount' => $walkInCount,
             'waitingWalkIns' => $waitingWalkIns,
             'remindersToSend' => $remindersToSend,
+            'pendingInquiries' => $pendingInquiries,
         ]);
     }
 }

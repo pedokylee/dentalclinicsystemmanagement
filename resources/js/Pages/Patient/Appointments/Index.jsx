@@ -1,61 +1,64 @@
 import PatientLayout from '@/Layouts/PatientLayout'
-import { Link } from '@inertiajs/react'
+import { router } from '@inertiajs/react'
 
 export default function AppointmentsIndex({ appointments }) {
-    const handleExportPdf = () => {
-        window.location.href = route('patient.appointments.export-pdf')
-    }
+    const rows = appointments?.data ?? []
 
-    const handleExportExcel = () => {
-        window.location.href = route('patient.appointments.export-excel')
+    const cancelAppointment = (appointmentId) => {
+        if (confirm('Cancel this appointment?')) {
+            router.delete(`/patient/appointments/${appointmentId}`)
+        }
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-[#E2FAF7]">My Appointments</h1>
-                <div className="flex gap-2">
-                    <button 
-                        onClick={handleExportPdf}
-                        className="px-4 py-2 bg-[#0D9488] text-white rounded hover:bg-[#14B8A6] transition-colors text-sm"
-                    >
-                        Export PDF
-                    </button>
-                    <button 
-                        onClick={handleExportExcel}
-                        className="px-4 py-2 bg-[#F59E0B] text-white rounded hover:bg-opacity-80 transition-colors text-sm"
-                    >
-                        Export Excel
-                    </button>
+        <div className="dcms-page">
+            <div className="dcms-page-header">
+                <div>
+                    <h1 className="dcms-page-title">My Appointments</h1>
+                    <p className="dcms-page-subtitle">View upcoming visits and past appointments. Booking remains managed by clinic staff.</p>
+                </div>
+                <div className="flex gap-3">
+                    <a href={route('patient.appointments.export-pdf')} className="dcms-btn-gold">Export PDF</a>
+                    <a href={route('patient.appointments.export-excel')} className="dcms-btn-secondary">Export Excel</a>
                 </div>
             </div>
 
-            <div className="space-y-4">
-                {appointments.data.length === 0 ? (
-                    <div className="text-center py-8 text-[#7ABFB9]">No appointments scheduled</div>
-                ) : (
-                    appointments.data.map((apt) => (
-                        <div
-                            key={apt.id}
-                            className="bg-[#0E2C28] border-l-4 border-[#0D9488] p-6 rounded flex justify-between items-center"
-                        >
-                            <div>
-                                <p className="font-bold text-[#E2FAF7]">{apt.appointment_date} at {apt.appointment_time}</p>
-                                <p className="text-[#7ABFB9]">Dr. {apt.dentist.user.name}</p>
-                                <p className="text-sm text-[#4A8C85]">{apt.type}</p>
-                            </div>
-                            <div className="space-x-3">
-                                <span className={`px-3 py-1 rounded text-xs font-semibold ${apt.status === 'confirmed' ? 'bg-[#0D9488]' : 'bg-[#F59E0B]'} text-white`}>
-                                    {apt.status}
-                                </span>
-                                {apt.appointment_date > new Date().toISOString().split('T')[0] && (
-                                    <button className="text-red-500 hover:text-red-600">Cancel</button>
-                                )}
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
+            <section className="dcms-card">
+                <div className="overflow-x-auto">
+                    <table className="dcms-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Dentist</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rows.map((appointment) => (
+                                <tr key={appointment.id}>
+                                    <td>{appointment.appointment_date} - {appointment.appointment_time}</td>
+                                    <td>{appointment.dentist.user.name}</td>
+                                    <td>{appointment.type}</td>
+                                    <td>
+                                        <span className={appointment.status === 'confirmed' ? 'dcms-chip-teal' : appointment.status === 'cancelled' ? 'dcms-chip-red' : 'dcms-chip-gold'}>
+                                            {appointment.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {appointment.status !== 'cancelled' && new Date(`${appointment.appointment_date}T${appointment.appointment_time}`) > new Date() ? (
+                                            <button className="text-sm font-semibold text-red-600" onClick={() => cancelAppointment(appointment.id)}>Cancel</button>
+                                        ) : (
+                                            <span className="text-sm text-[var(--dcms-text-soft)]">No action</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     )
 }
