@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Dental Clinic Management System - DFD Level 0</title>
+  <desc id="desc">Context-level data flow diagram showing the dental clinic management system as one process with public patient, staff, dentist, and admin external entities.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fbfd; }
+      .title { font: 700 32px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 16px 'Segoe UI', Arial, sans-serif; fill: #475569; }
+      .entity { fill: #ffffff; stroke: #2563eb; stroke-width: 2.2; rx: 14; ry: 14; }
+      .process { fill: #e6fffb; stroke: #0f766e; stroke-width: 3; rx: 26; ry: 26; }
+      .label { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .text { font: 14px 'Segoe UI', Arial, sans-serif; fill: #1f2937; }
+      .flow { stroke: #334155; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+  <text class="title" x="800" y="56" text-anchor="middle">Dental Clinic Management System</text>
+  <text class="subtitle" x="800" y="84" text-anchor="middle">Data Flow Diagram Level 0 / Context Diagram</text>
+
+  <rect class="process" x="515" y="255" width="570" height="320"/>
+  <text class="label" x="800" y="320" text-anchor="middle">Process 0</text>
+  <text class="label" x="800" y="355" text-anchor="middle">Dental Clinic Management System</text>
+  <text class="text" x="800" y="405" text-anchor="middle">Handles booking, authentication, scheduling,</text>
+  <text class="text" x="800" y="430" text-anchor="middle">treatment records, notifications, reporting,</text>
+  <text class="text" x="800" y="455" text-anchor="middle">audit logging, settings, and backups</text>
+
+  <rect class="entity" x="110" y="320" width="250" height="120"/>
+  <text class="label" x="235" y="372" text-anchor="middle">Public / Patient</text>
+  <text class="text" x="235" y="398" text-anchor="middle">Guest and patient users</text>
+
+  <rect class="entity" x="1250" y="160" width="220" height="110"/>
+  <text class="label" x="1360" y="210" text-anchor="middle">Staff</text>
+  <text class="text" x="1360" y="236" text-anchor="middle">Front desk users</text>
+
+  <rect class="entity" x="1250" y="390" width="220" height="110"/>
+  <text class="label" x="1360" y="440" text-anchor="middle">Dentist</text>
+  <text class="text" x="1360" y="466" text-anchor="middle">Clinical users</text>
+
+  <rect class="entity" x="1250" y="620" width="220" height="110"/>
+  <text class="label" x="1360" y="670" text-anchor="middle">Admin</text>
+  <text class="text" x="1360" y="696" text-anchor="middle">System oversight</text>
+
+  <path class="flow" d="M360 350 C430 350, 445 350, 515 350"/>
+  <path class="flow" d="M515 420 C445 420, 430 420, 360 420"/>
+  <text class="text" x="438" y="336" text-anchor="middle">Registration Data</text>
+  <text class="text" x="438" y="356" text-anchor="middle">Inquiry Submission</text>
+  <text class="text" x="438" y="376" text-anchor="middle">Appointment Booking Request</text>
+  <text class="text" x="438" y="446" text-anchor="middle">Appointment Confirmation</text>
+  <text class="text" x="438" y="466" text-anchor="middle">Notifications / Treatment History</text>
+
+  <path class="flow" d="M1085 310 C1160 280, 1170 240, 1250 220"/>
+  <path class="flow" d="M1250 255 C1170 285, 1160 325, 1085 355"/>
+  <text class="text" x="1170" y="220" text-anchor="middle">Patient Registration Data</text>
+  <text class="text" x="1170" y="240" text-anchor="middle">Inquiry Verification</text>
+  <text class="text" x="1170" y="260" text-anchor="middle">Appointment Scheduling Data</text>
+  <text class="text" x="1175" y="342" text-anchor="middle">Patient Records / Queue / Inquiries</text>
+
+  <path class="flow" d="M1085 425 C1170 425, 1185 425, 1250 445"/>
+  <path class="flow" d="M1250 480 C1185 480, 1170 480, 1085 480"/>
+  <text class="text" x="1170" y="410" text-anchor="middle">Treatment Notes</text>
+  <text class="text" x="1170" y="430" text-anchor="middle">Prescription Data</text>
+  <text class="text" x="1170" y="450" text-anchor="middle">Appointment Review</text>
+  <text class="text" x="1170" y="506" text-anchor="middle">Patient History / Schedule / Notifications</text>
+
+  <path class="flow" d="M1085 530 C1170 580, 1185 640, 1250 675"/>
+  <path class="flow" d="M1250 715 C1185 690, 1170 640, 1085 605"/>
+  <text class="text" x="1175" y="612" text-anchor="middle">User Management Commands</text>
+  <text class="text" x="1175" y="632" text-anchor="middle">Configuration Updates</text>
+  <text class="text" x="1175" y="652" text-anchor="middle">Backup / Report Requests</text>
+  <text class="text" x="1175" y="734" text-anchor="middle">Reports / Audit Logs / Backup Status</text>
+</svg>

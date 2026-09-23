@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Dental Clinic Management System - System Architecture Diagram</title>
+  <desc id="desc">Three-layer system architecture showing presentation, logic, and data layers with request flow from browser to database and response flow back to the browser.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fbfd; }
+      .title { font: 700 32px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 16px 'Segoe UI', Arial, sans-serif; fill: #475569; }
+      .layer-title { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .label { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .text { font: 14px 'Segoe UI', Arial, sans-serif; fill: #1e293b; }
+      .small { font: 13px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .layer { rx: 24; ry: 24; stroke-width: 2; }
+      .panel { rx: 16; ry: 16; stroke-width: 2; }
+      .box { rx: 12; ry: 12; stroke-width: 1.8; }
+      .arrow { stroke: #0f766e; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .response { stroke: #2563eb; stroke-width: 3; fill: none; stroke-dasharray: 10 8; marker-end: url(#arrow-blue); }
+      .side-arrow { stroke: #0f766e; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f766e"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+
+  <text class="title" x="800" y="56" text-anchor="middle">Dental Clinic Management System</text>
+  <text class="subtitle" x="800" y="84" text-anchor="middle">System Architecture Diagram</text>
+
+  <rect class="layer" x="70" y="120" width="1460" height="180" fill="#e8f6f4" stroke="#2aa198"/>
+  <rect class="layer" x="70" y="330" width="1460" height="250" fill="#eff6ff" stroke="#3b82f6"/>
+  <rect class="layer" x="70" y="610" width="1460" height="210" fill="#f8fafc" stroke="#64748b"/>
+
+  <text class="layer-title" x="120" y="155">Presentation Layer</text>
+  <text class="layer-title" x="120" y="365">Application / Logic Layer</text>
+  <text class="layer-title" x="120" y="645">Data Layer</text>
+
+  <rect class="panel" x="110" y="175" width="220" height="90" fill="#ffffff" stroke="#2aa198"/>
+  <text class="label" x="220" y="210" text-anchor="middle">Browser / User Device</text>
+  <text class="text" x="220" y="235" text-anchor="middle">Public, Admin, Staff,</text>
+  <text class="text" x="220" y="255" text-anchor="middle">Dentist, Patient users</text>
+
+  <rect class="panel" x="380" y="175" width="240" height="90" fill="#ffffff" stroke="#2aa198"/>
+  <text class="label" x="500" y="210" text-anchor="middle">React Frontend</text>
+  <text class="text" x="500" y="235" text-anchor="middle">Pages, components,</text>
+  <text class="text" x="500" y="255" text-anchor="middle">layouts, forms, tables</text>
+
+  <rect class="panel" x="670" y="175" width="240" height="90" fill="#ffffff" stroke="#2aa198"/>
+  <text class="label" x="790" y="210" text-anchor="middle">Inertia.js Layer</text>
+  <text class="text" x="790" y="235" text-anchor="middle">Server-driven SPA</text>
+  <text class="text" x="790" y="255" text-anchor="middle">navigation and props</text>
+
+  <rect class="panel" x="960" y="175" width="520" height="90" fill="#ffffff" stroke="#2aa198"/>
+  <text class="label" x="1220" y="210" text-anchor="middle">Role-Based Interfaces</text>
+  <text class="text" x="1220" y="235" text-anchor="middle">Public Pages | Admin Pages | Staff Pages | Dentist Pages | Patient Pages</text>
+  <text class="text" x="1220" y="255" text-anchor="middle">Rendered through React pages returned by Laravel Inertia responses</text>
+
+  <rect class="box" x="110" y="385" width="220" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="220" y="425" text-anchor="middle">Laravel Application</text>
+
+  <rect class="box" x="370" y="385" width="180" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="460" y="425" text-anchor="middle">Routes &amp; Middleware</text>
+
+  <rect class="box" x="590" y="385" width="170" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="675" y="425" text-anchor="middle">Controllers</text>
+
+  <rect class="box" x="800" y="385" width="170" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="885" y="425" text-anchor="middle">Validation</text>
+
+  <rect class="box" x="1010" y="385" width="210" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="1115" y="425" text-anchor="middle">Business Logic</text>
+
+  <rect class="box" x="1260" y="385" width="220" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="1370" y="418" text-anchor="middle">Authentication &amp;</text>
+  <text class="label" x="1370" y="438" text-anchor="middle">Role Checking</text>
+
+  <rect class="box" x="260" y="485" width="220" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="370" y="525" text-anchor="middle">Support Services</text>
+
+  <rect class="box" x="540" y="485" width="220" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="650" y="525" text-anchor="middle">Jobs &amp; Observers</text>
+
+  <rect class="box" x="820" y="485" width="220" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="930" y="525" text-anchor="middle">Mail / Export Services</text>
+
+  <rect class="box" x="1100" y="485" width="260" height="70" fill="#ffffff" stroke="#3b82f6"/>
+  <text class="label" x="1230" y="518" text-anchor="middle">Appointment Availability,</text>
+  <text class="label" x="1230" y="538" text-anchor="middle">ReportData, Settings</text>
+
+  <rect class="panel" x="110" y="665" width="250" height="100" fill="#ffffff" stroke="#64748b"/>
+  <text class="label" x="235" y="705" text-anchor="middle">Eloquent ORM</text>
+  <text class="text" x="235" y="730" text-anchor="middle">Maps models to</text>
+  <text class="text" x="235" y="750" text-anchor="middle">relational data</text>
+
+  <rect class="panel" x="410" y="665" width="510" height="100" fill="#ffffff" stroke="#64748b"/>
+  <text class="label" x="665" y="700" text-anchor="middle">Relational Database</text>
+  <text class="text" x="665" y="725" text-anchor="middle">SQLite in current local setup</text>
+  <text class="small" x="665" y="750" text-anchor="middle">users, patients, dentists, appointments, treatment_records, notifications, audit_logs, inquiries</text>
+
+  <rect class="panel" x="970" y="665" width="250" height="100" fill="#ffffff" stroke="#64748b"/>
+  <text class="label" x="1095" y="700" text-anchor="middle">File Storage</text>
+  <text class="text" x="1095" y="725" text-anchor="middle">Treatment attachments</text>
+  <text class="text" x="1095" y="745" text-anchor="middle">and backup files</text>
+
+  <rect class="panel" x="1270" y="665" width="210" height="100" fill="#ffffff" stroke="#64748b"/>
+  <text class="label" x="1375" y="700" text-anchor="middle">Data Outputs</text>
+  <text class="text" x="1375" y="725" text-anchor="middle">PDF, Excel,</text>
+  <text class="text" x="1375" y="745" text-anchor="middle">notifications, emails</text>
+
+  <path class="arrow" d="M220 265 L220 385"/>
+  <path class="arrow" d="M500 265 L500 385"/>
+  <path class="arrow" d="M790 265 L790 385"/>
+  <path class="arrow" d="M1220 265 L1220 385"/>
+
+  <path class="arrow" d="M220 455 L220 665"/>
+  <path class="arrow" d="M665 455 L665 665"/>
+
+  <path class="side-arrow" d="M650 555 L650 630 L1095 630 L1095 665"/>
+  <path class="side-arrow" d="M930 555 L930 620 L1375 620 L1375 665"/>
+
+  <path class="response" d="M820 785 L820 820 L220 820 L220 275"/>
+  <text class="small" x="875" y="814">Inertia response to browser</text>
+
+  <text class="small" x="240" y="330">User request</text>
+  <text class="small" x="240" y="605">Database read / write</text>
+  <text class="small" x="1120" y="632">File upload</text>
+  <text class="small" x="1388" y="617">Notification / export dispatch</text>
+</svg>

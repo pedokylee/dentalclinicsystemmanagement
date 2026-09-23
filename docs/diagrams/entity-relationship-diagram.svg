@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1600" viewBox="0 0 2200 1600" role="img" aria-labelledby="title desc">
+  <title id="title">Dental Clinic Management System - Entity Relationship Diagram</title>
+  <desc id="desc">ERD showing key tables, primary keys, foreign keys, and cardinality relationships for the dental clinic management system.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fbfd; }
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 16px 'Segoe UI', Arial, sans-serif; fill: #475569; }
+      .table { fill: #ffffff; stroke: #0f766e; stroke-width: 2; rx: 12; ry: 12; }
+      .head { fill: #e6fffb; stroke: #0f766e; stroke-width: 2; rx: 12; ry: 12; }
+      .name { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .field { font: 13px 'Consolas', 'Courier New', monospace; fill: #1f2937; }
+      .pk { fill: #0f766e; font-weight: 700; }
+      .fk { fill: #2563eb; font-weight: 700; }
+      .line { stroke: #334155; stroke-width: 2.2; fill: none; }
+      .card { font: 700 13px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="2200" height="1600"/>
+  <text class="title" x="1100" y="52" text-anchor="middle">Dental Clinic Management System</text>
+  <text class="subtitle" x="1100" y="80" text-anchor="middle">Entity Relationship Diagram</text>
+
+  <rect class="table" x="840" y="110" width="520" height="260"/><rect class="head" x="840" y="110" width="520" height="42"/><text class="name" x="1100" y="138" text-anchor="middle">users</text>
+  <text class="field" x="865" y="178"><tspan class="pk">PK</tspan> id</text><text class="field" x="865" y="202">name</text><text class="field" x="865" y="226">email</text><text class="field" x="865" y="250">password</text><text class="field" x="865" y="274">role</text><text class="field" x="865" y="298">active</text><text class="field" x="865" y="322">last_login</text><text class="field" x="865" y="346">email_verified_at</text><text class="field" x="1110" y="178">created_at</text><text class="field" x="1110" y="202">updated_at</text>
+
+  <rect class="table" x="110" y="450" width="520" height="350"/><rect class="head" x="110" y="450" width="520" height="42"/><text class="name" x="370" y="478" text-anchor="middle">patients</text>
+  <text class="field" x="135" y="518"><tspan class="pk">PK</tspan> id</text><text class="field" x="135" y="542"><tspan class="fk">FK</tspan> user_id -&gt; users.id</text><text class="field" x="135" y="566">first_name</text><text class="field" x="135" y="590">last_name</text><text class="field" x="135" y="614">email</text><text class="field" x="135" y="638">phone</text><text class="field" x="135" y="662">contact_number</text><text class="field" x="135" y="686">date_of_birth</text><text class="field" x="135" y="710">gender</text><text class="field" x="135" y="734">address</text><text class="field" x="380" y="518">street_address</text><text class="field" x="380" y="542">city</text><text class="field" x="380" y="566">state</text><text class="field" x="380" y="590">zip_code</text><text class="field" x="380" y="614">medical_alerts</text><text class="field" x="380" y="638">emergency_contact</text><text class="field" x="380" y="662">emergency_contact_name</text><text class="field" x="380" y="686">emergency_contact_phone</text><text class="field" x="380" y="710">created_at</text><text class="field" x="380" y="734">updated_at</text>
+
+  <rect class="table" x="770" y="450" width="360" height="190"/><rect class="head" x="770" y="450" width="360" height="42"/><text class="name" x="950" y="478" text-anchor="middle">dentists</text>
+  <text class="field" x="795" y="518"><tspan class="pk">PK</tspan> id</text><text class="field" x="795" y="542"><tspan class="fk">FK</tspan> user_id -&gt; users.id</text><text class="field" x="795" y="566">specialization</text><text class="field" x="795" y="590">schedule_days</text><text class="field" x="795" y="614">created_at</text><text class="field" x="795" y="638">updated_at</text>
+
+  <rect class="table" x="1490" y="450" width="420" height="190"/><rect class="head" x="1490" y="450" width="420" height="42"/><text class="name" x="1700" y="478" text-anchor="middle">user_settings</text>
+  <text class="field" x="1515" y="518"><tspan class="pk">PK</tspan> id</text><text class="field" x="1515" y="542"><tspan class="fk">FK</tspan> user_id -&gt; users.id</text><text class="field" x="1515" y="566">notification_preferences</text><text class="field" x="1515" y="590">ui_preferences</text><text class="field" x="1515" y="614">created_at</text><text class="field" x="1515" y="638">updated_at</text>
+
+  <rect class="table" x="1470" y="760" width="440" height="220"/><rect class="head" x="1470" y="760" width="440" height="42"/><text class="name" x="1690" y="788" text-anchor="middle">notifications</text>
+  <text class="field" x="1495" y="828"><tspan class="pk">PK</tspan> id</text><text class="field" x="1495" y="852"><tspan class="fk">FK</tspan> user_id -&gt; users.id</text><text class="field" x="1495" y="876">type</text><text class="field" x="1495" y="900">related_id</text><text class="field" x="1495" y="924">title</text><text class="field" x="1495" y="948">message</text><text class="field" x="1495" y="972">read</text><text class="field" x="1495" y="996">created_at / updated_at</text>
+
+  <rect class="table" x="1540" y="1030" width="370" height="220"/><rect class="head" x="1540" y="1030" width="370" height="42"/><text class="name" x="1725" y="1058" text-anchor="middle">audit_logs</text>
+  <text class="field" x="1565" y="1098"><tspan class="pk">PK</tspan> id</text><text class="field" x="1565" y="1122"><tspan class="fk">FK</tspan> user_id -&gt; users.id</text><text class="field" x="1565" y="1146">action</text><text class="field" x="1565" y="1170">module</text><text class="field" x="1565" y="1194">description</text><text class="field" x="1565" y="1218">ip_address</text><text class="field" x="1565" y="1242">created_at</text>
+
+  <rect class="table" x="1470" y="1290" width="500" height="250"/><rect class="head" x="1470" y="1290" width="500" height="42"/><text class="name" x="1720" y="1318" text-anchor="middle">patient_inquiries</text>
+  <text class="field" x="1495" y="1358"><tspan class="pk">PK</tspan> id</text><text class="field" x="1495" y="1382">full_name</text><text class="field" x="1495" y="1406">email</text><text class="field" x="1495" y="1430">phone</text><text class="field" x="1495" y="1454">preferred_date</text><text class="field" x="1495" y="1478">appointment_type</text><text class="field" x="1495" y="1502">concern</text><text class="field" x="1735" y="1358">status</text><text class="field" x="1735" y="1382">source</text><text class="field" x="1735" y="1406"><tspan class="fk">FK</tspan> matched_user_id -&gt; users.id</text><text class="field" x="1735" y="1430">reviewed_at</text><text class="field" x="1735" y="1454">created_at</text><text class="field" x="1735" y="1478">updated_at</text>
+
+  <rect class="table" x="790" y="760" width="420" height="250"/><rect class="head" x="790" y="760" width="420" height="42"/><text class="name" x="1000" y="788" text-anchor="middle">appointments</text>
+  <text class="field" x="815" y="828"><tspan class="pk">PK</tspan> id</text><text class="field" x="815" y="852"><tspan class="fk">FK</tspan> patient_id -&gt; patients.id</text><text class="field" x="815" y="876"><tspan class="fk">FK</tspan> dentist_id -&gt; dentists.id</text><text class="field" x="815" y="900">appointment_date</text><text class="field" x="815" y="924">appointment_time</text><text class="field" x="815" y="948">type</text><text class="field" x="815" y="972">status</text><text class="field" x="815" y="996">notes</text><text class="field" x="815" y="1020">confirmation_sent</text><text class="field" x="815" y="1044">created_at / updated_at</text>
+
+  <rect class="table" x="770" y="1090" width="470" height="280"/><rect class="head" x="770" y="1090" width="470" height="42"/><text class="name" x="1005" y="1118" text-anchor="middle">treatment_records</text>
+  <text class="field" x="795" y="1158"><tspan class="pk">PK</tspan> id</text><text class="field" x="795" y="1182"><tspan class="fk">FK</tspan> patient_id -&gt; patients.id</text><text class="field" x="795" y="1206"><tspan class="fk">FK</tspan> dentist_id -&gt; dentists.id</text><text class="field" x="795" y="1230"><tspan class="fk">FK</tspan> appointment_id -&gt; appointments.id</text><text class="field" x="795" y="1254">visit_date</text><text class="field" x="795" y="1278">procedures</text><text class="field" x="795" y="1302">notes</text><text class="field" x="795" y="1326">prescription</text><text class="field" x="795" y="1350">tooth_data</text><text class="field" x="795" y="1374">created_at / updated_at</text>
+
+  <rect class="table" x="780" y="1410" width="470" height="170"/><rect class="head" x="780" y="1410" width="470" height="42"/><text class="name" x="1015" y="1438" text-anchor="middle">treatment_record_attachments</text>
+  <text class="field" x="805" y="1478"><tspan class="pk">PK</tspan> id</text><text class="field" x="805" y="1502"><tspan class="fk">FK</tspan> treatment_record_id -&gt; treatment_records.id</text><text class="field" x="805" y="1526">type</text><text class="field" x="805" y="1550">file_path / original_name / mime_type / size</text>
+
+  <rect class="table" x="120" y="980" width="470" height="220"/><rect class="head" x="120" y="980" width="470" height="42"/><text class="name" x="355" y="1008" text-anchor="middle">profile_change_requests</text>
+  <text class="field" x="145" y="1048"><tspan class="pk">PK</tspan> id</text><text class="field" x="145" y="1072"><tspan class="fk">FK</tspan> patient_id -&gt; patients.id</text><text class="field" x="145" y="1096">requested_changes</text><text class="field" x="145" y="1120">status</text><text class="field" x="145" y="1144">rejection_reason</text><text class="field" x="145" y="1168">created_at</text><text class="field" x="145" y="1192">updated_at</text>
+
+  <rect class="table" x="122" y="1290" width="360" height="190"/><rect class="head" x="122" y="1290" width="360" height="42"/><text class="name" x="302" y="1318" text-anchor="middle">system_settings</text>
+  <text class="field" x="147" y="1358"><tspan class="pk">PK</tspan> id</text><text class="field" x="147" y="1382">key</text><text class="field" x="147" y="1406">value</text><text class="field" x="147" y="1430">created_at</text><text class="field" x="147" y="1454">updated_at</text>
+
+  <path class="line" d="M1010 370 C960 420, 700 430, 630 500"/><text class="card" x="850" y="410">1</text><text class="card" x="650" y="488">0..1</text>
+  <path class="line" d="M1080 370 C1040 420, 990 430, 950 450"/><text class="card" x="1038" y="410">1</text><text class="card" x="960" y="442">0..1</text>
+  <path class="line" d="M1180 370 C1280 430, 1500 420, 1595 450"/><text class="card" x="1265" y="408">1</text><text class="card" x="1568" y="442">0..1</text>
+  <path class="line" d="M1240 370 C1450 500, 1570 650, 1620 760"/><text class="card" x="1360" y="470">1</text><text class="card" x="1580" y="726">1..*</text>
+  <path class="line" d="M1280 370 C1560 620, 1690 850, 1710 1030"/><text class="card" x="1450" y="560">1</text><text class="card" x="1714" y="1000">1..*</text>
+  <path class="line" d="M1320 370 C1640 820, 1760 1080, 1770 1290"/><text class="card" x="1515" y="670">1</text><text class="card" x="1776" y="1260">0..*</text>
+  <path class="line" d="M630 610 C710 760, 780 800, 790 840"/><text class="card" x="690" y="720">1</text><text class="card" x="766" y="835">1..*</text>
+  <path class="line" d="M1000 640 C1000 700, 1000 720, 1000 760"/><text class="card" x="1010" y="706">1</text><text class="card" x="1010" y="748">1..*</text>
+  <path class="line" d="M380 800 C380 875, 355 920, 355 980"/><text class="card" x="392" y="870">1</text><text class="card" x="368" y="962">1..*</text>
+  <path class="line" d="M1000 1010 C1000 1048, 1005 1058, 1005 1090"/><text class="card" x="1014" y="1044">1</text><text class="card" x="1014" y="1080">0..*</text>
+  <path class="line" d="M590 820 C720 1110, 820 1150, 770 1180"/><text class="card" x="692" y="1020">1</text><text class="card" x="740" y="1174">1..*</text>
+  <path class="line" d="M1080 1010 C1080 1048, 1080 1060, 1080 1090"/><text class="card" x="1090" y="1044">1</text><text class="card" x="1090" y="1080">1..*</text>
+  <path class="line" d="M1005 1370 C1005 1395, 1015 1398, 1015 1410"/><text class="card" x="1017" y="1390">1</text><text class="card" x="1020" y="1406">1..*</text>
+</svg>

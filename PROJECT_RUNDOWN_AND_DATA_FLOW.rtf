@@ -1,0 +1,712 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
+\viewkind4\uc1
+\pard\sa180\qc\b\fs36\f0 Dental Clinic Management System\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 1. Project Summary\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 This project is a role-based Dental Clinic Management System (DCMS) built with Laravel, Inertia.js, and React. It supports four major user roles:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - `admin`\par
+\pard\li360\sa60\fs22\f0 - `staff`\par
+\pard\li360\sa60\fs22\f0 - `dentist`\par
+\pard\li360\sa60\fs22\f0 - `patient`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 The system combines:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - a public-facing landing page\par
+\pard\li360\sa60\fs22\f0 - authenticated portal access\par
+\pard\li360\sa60\fs22\f0 - appointment booking and scheduling\par
+\pard\li360\sa60\fs22\f0 - patient registration and verification\par
+\pard\li360\sa60\fs22\f0 - treatment history and file attachments\par
+\pard\li360\sa60\fs22\f0 - notifications and reminders\par
+\pard\li360\sa60\fs22\f0 - reports and exports\par
+\pard\li360\sa60\fs22\f0 - system configuration and backup management\par
+\pard\li360\sa60\fs22\f0 - audit logging for traceability\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 At a high level, Laravel handles routing, validation, business logic, persistence, exports, mail, and jobs, while React pages render the user interface through Inertia.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 2. Tech Stack\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Backend\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - Laravel 12\par
+\pard\li360\sa60\fs22\f0 - PHP 8.2+\par
+\pard\li360\sa60\fs22\f0 - Eloquent ORM\par
+\pard\li360\sa60\fs22\f0 - Laravel Breeze authentication\par
+\pard\li360\sa60\fs22\f0 - Inertia Laravel adapter\par
+\pard\li360\sa60\fs22\f0 - Laravel queues and jobs\par
+\pard\li360\sa60\fs22\f0 - DOMPDF for PDF export\par
+\pard\li360\sa60\fs22\f0 - Laravel Excel for Excel export\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Frontend\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - React 19\par
+\pard\li360\sa60\fs22\f0 - Inertia.js React adapter\par
+\pard\li360\sa60\fs22\f0 - Vite\par
+\pard\li360\sa60\fs22\f0 - Tailwind CSS\par
+\pard\li360\sa60\fs22\f0 - Chart.js / react-chartjs-2\par
+\pard\li360\sa60\fs22\f0 - FullCalendar\par
+\pard\li360\sa60\fs22\f0 - Lucide React icons\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Main architectural style\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - Monolithic web application\par
+\pard\li360\sa60\fs22\f0 - Server-driven SPA using Laravel + Inertia\par
+\pard\li360\sa60\fs22\f0 - Role-segmented dashboards and modules\par
+\pard\li360\sa60\fs22\f0 - Relational database-centered domain model\par
+\pard\li360\sa60\fs22\f0 - Queue-backed asynchronous reminders/notifications\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 3. Application Architecture\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 3.1 Request/response model\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Browser sends a request to Laravel.\par
+\pard\li360\sa60\fs22\f0 2. Route middleware checks authentication and role.\par
+\pard\li360\sa60\fs22\f0 3. Controller validates input and runs business logic.\par
+\pard\li360\sa60\fs22\f0 4. Eloquent reads/writes domain models.\par
+\pard\li360\sa60\fs22\f0 5. Controller returns either:\par
+\pard\sa120\fs22\f0 - an Inertia page with props\par
+\pard\sa120\fs22\f0 - a redirect with flash messages\par
+\pard\sa120\fs22\f0 - a JSON response for async UI calls\par
+\pard\sa120\fs22\f0 - a file download for exports/backups\par
+\pard\li360\sa60\fs22\f0 6. Shared Inertia middleware injects auth, flash, and unread notification count.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 3.2 Main layers\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Presentation layer\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - React pages under `resources/js/Pages`\par
+\pard\li360\sa60\fs22\f0 - role-specific layouts under `resources/js/Layouts`\par
+\pard\li360\sa60\fs22\f0 - reusable UI components under `resources/js/Components`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Application layer\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - controllers under `app/Http/Controllers`\par
+\pard\li360\sa60\fs22\f0 - middleware for auth/role gating\par
+\pard\li360\sa60\fs22\f0 - support classes for availability, reporting, settings defaults\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Domain/data layer\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - Eloquent models under `app/Models`\par
+\pard\li360\sa60\fs22\f0 - migrations under `database/migrations`\par
+\pard\li360\sa60\fs22\f0 - database-backed notifications, audit logs, settings, appointments, patients, treatments\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Async/integration layer\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - mailables under `app/Mail`\par
+\pard\li360\sa60\fs22\f0 - queued jobs under `app/Jobs`\par
+\pard\li360\sa60\fs22\f0 - `AppointmentObserver` dispatches reminder/confirmation jobs\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 4. Module Map\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 4.1 Public module\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - `Home.jsx`\par
+\pard\sa120\fs22\f0 - marketing landing page\par
+\pard\sa120\fs22\f0 - new patient inquiry form\par
+\pard\li360\sa60\fs22\f0 - public booking pages\par
+\pard\sa120\fs22\f0 - `Appointments/BookPublic.jsx`\par
+\pard\sa120\fs22\f0 - `Appointments/Confirmation.jsx`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Key backend controllers\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - `LandingInquiryController`\par
+\pard\li360\sa60\fs22\f0 - `Patient\\AppointmentController` for self-booking endpoints\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 4.2 Admin module\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - dashboard and KPI overview\par
+\pard\li360\sa60\fs22\f0 - user management\par
+\pard\li360\sa60\fs22\f0 - reports and analytics\par
+\pard\li360\sa60\fs22\f0 - audit log\par
+\pard\li360\sa60\fs22\f0 - system config\par
+\pard\li360\sa60\fs22\f0 - backup management\par
+\pard\li360\sa60\fs22\f0 - admin-created appointment booking\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 4.3 Staff module\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - dashboard\par
+\pard\li360\sa60\fs22\f0 - patient registration\par
+\pard\li360\sa60\fs22\f0 - inquiry verification/conversion\par
+\pard\li360\sa60\fs22\f0 - appointment management\par
+\pard\li360\sa60\fs22\f0 - check-in queue\par
+\pard\li360\sa60\fs22\f0 - reports\par
+\pard\li360\sa60\fs22\f0 - notifications\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 4.4 Dentist module\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - dashboard\par
+\pard\li360\sa60\fs22\f0 - own appointments calendar\par
+\pard\li360\sa60\fs22\f0 - assigned patients\par
+\pard\li360\sa60\fs22\f0 - treatment record creation/editing\par
+\pard\li360\sa60\fs22\f0 - attachment upload\par
+\pard\li360\sa60\fs22\f0 - notifications\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 4.5 Patient module\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - dashboard\par
+\pard\li360\sa60\fs22\f0 - self-booked appointment list\par
+\pard\li360\sa60\fs22\f0 - appointment cancellation\par
+\pard\li360\sa60\fs22\f0 - treatment history and PDF download\par
+\pard\li360\sa60\fs22\f0 - notifications\par
+\pard\li360\sa60\fs22\f0 - profile management and sensitive-field change requests\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 5. Role Responsibilities\par
+\pard\sa120\fs22\f0 \par
+\pard\sa60\fs18\f1 Role    Main responsibilities\par
+\pard\sa60\fs18\f1 Admin    Manage users, view reports, review audit data, configure clinic settings, handle backup/restore, create appointments\par
+\pard\sa60\fs18\f1 Staff    Register patients, verify landing inquiries, manage appointments, send reminders, handle check-ins, monitor notifications\par
+\pard\sa60\fs18\f1 Dentist    View own schedule, manage own patients, create/edit treatment records, upload x-rays/photos, cancel own appointments\par
+\pard\sa60\fs18\f1 Patient    Book own appointments, view notifications, cancel upcoming appointments, view treatment history, manage profile/preferences\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 6. Core Domain Entities\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 6.1 Main entities\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - `User`\par
+\pard\sa120\fs22\f0 - authentication identity\par
+\pard\sa120\fs22\f0 - holds role, active flag, last login\par
+\pard\li360\sa60\fs22\f0 - `Patient`\par
+\pard\sa120\fs22\f0 - patient demographic and medical profile\par
+\pard\sa120\fs22\f0 - optionally linked to a `User`\par
+\pard\li360\sa60\fs22\f0 - `Dentist`\par
+\pard\sa120\fs22\f0 - dentist profile linked to a `User`\par
+\pard\sa120\fs22\f0 - includes specialization and schedule days\par
+\pard\li360\sa60\fs22\f0 - `Appointment`\par
+\pard\sa120\fs22\f0 - links patient and dentist\par
+\pard\sa120\fs22\f0 - stores date, time, type, notes, status\par
+\pard\li360\sa60\fs22\f0 - `TreatmentRecord`\par
+\pard\sa120\fs22\f0 - clinical record for a patient visit\par
+\pard\sa120\fs22\f0 - linked to dentist, patient, and optionally appointment\par
+\pard\li360\sa60\fs22\f0 - `TreatmentRecordAttachment`\par
+\pard\sa120\fs22\f0 - x-rays or procedure photos for treatment records\par
+\pard\li360\sa60\fs22\f0 - `Notification`\par
+\pard\sa120\fs22\f0 - in-app notification stored in database\par
+\pard\li360\sa60\fs22\f0 - `AuditLog`\par
+\pard\sa120\fs22\f0 - immutable activity trail\par
+\pard\li360\sa60\fs22\f0 - `PatientInquiry`\par
+\pard\sa120\fs22\f0 - landing-page intake record awaiting staff review\par
+\pard\li360\sa60\fs22\f0 - `ProfileChangeRequest`\par
+\pard\sa120\fs22\f0 - patient-requested change for sensitive fields\par
+\pard\li360\sa60\fs22\f0 - `UserSetting`\par
+\pard\sa120\fs22\f0 - per-user notification/UI preferences\par
+\pard\li360\sa60\fs22\f0 - `SystemSetting`\par
+\pard\sa120\fs22\f0 - clinic-wide config values\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 6.2 Entity relationship diagram\par
+\pard\sa120\fs22\f0 \par
+\pard\sa0\fs18\f1 erDiagram\par
+\pard\sa0\fs18\f1     USER ||--o| PATIENT : has\par
+\pard\sa0\fs18\f1     USER ||--o| DENTIST : has\par
+\pard\sa0\fs18\f1     USER ||--o| USER_SETTING : has\par
+\pard\sa0\fs18\f1     USER ||--o\{ NOTIFICATION : receives\par
+\pard\sa0\fs18\f1     USER ||--o\{ AUDIT_LOG : creates\par
+\pard\sa0\fs18\f1     USER ||--o\{ PATIENT_INQUIRY : matched_to\par
+\pard\sa0\fs18\f1 \par
+\pard\sa0\fs18\f1     PATIENT ||--o\{ APPOINTMENT : books\par
+\pard\sa0\fs18\f1     PATIENT ||--o\{ TREATMENT_RECORD : owns\par
+\pard\sa0\fs18\f1     PATIENT ||--o\{ PROFILE_CHANGE_REQUEST : submits\par
+\pard\sa0\fs18\f1 \par
+\pard\sa0\fs18\f1     DENTIST ||--o\{ APPOINTMENT : handles\par
+\pard\sa0\fs18\f1     DENTIST ||--o\{ TREATMENT_RECORD : writes\par
+\pard\sa0\fs18\f1 \par
+\pard\sa0\fs18\f1     APPOINTMENT ||--o| TREATMENT_RECORD : may_generate\par
+\pard\sa0\fs18\f1     TREATMENT_RECORD ||--o\{ TREATMENT_RECORD_ATTACHMENT : contains\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 7. Important Business Rules\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - Only authenticated `patient` accounts can use the self-booking flow.\par
+\pard\li360\sa60\fs22\f0 - Appointment times are generated from clinic config (`config/clinic.php`).\par
+\pard\li360\sa60\fs22\f0 - Dentist availability depends on:\par
+\pard\sa120\fs22\f0 - dentist account being active\par
+\pard\sa120\fs22\f0 - selected day matching `schedule_days`\par
+\pard\sa120\fs22\f0 - no non-cancelled appointment conflict for the same slot\par
+\pard\li360\sa60\fs22\f0 - Staff-created appointments default to `pending`.\par
+\pard\li360\sa60\fs22\f0 - Patient self-booked appointments default to `scheduled`.\par
+\pard\li360\sa60\fs22\f0 - Cancelled appointments are excluded from availability checks.\par
+\pard\li360\sa60\fs22\f0 - Patient sensitive profile changes (`email`, `phone`, `medical_alerts`) use approval requests instead of direct updates.\par
+\pard\li360\sa60\fs22\f0 - Treatment records are limited to the dentist who owns them.\par
+\pard\li360\sa60\fs22\f0 - Dentist patient access is constrained to patients with appointments under that dentist.\par
+\pard\li360\sa60\fs22\f0 - Notifications are role/user-specific and access-controlled.\par
+\pard\li360\sa60\fs22\f0 - Audit logging is used across major create/update/cancel/export/backup actions.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8. End-to-End Data Flows\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.1 New patient landing inquiry flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Captures an unverified prospective patient from the landing page and routes the request to staff for validation.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. User fills out the inquiry form on `Home.jsx`.\par
+\pard\li360\sa60\fs22\f0 2. Frontend posts to `POST /inquiries`.\par
+\pard\li360\sa60\fs22\f0 3. `LandingInquiryController@store` validates input.\par
+\pard\li360\sa60\fs22\f0 4. System checks whether `patient_inquiries` table exists.\par
+\pard\li360\sa60\fs22\f0 5. System optionally matches the inquiry email to an existing user.\par
+\pard\li360\sa60\fs22\f0 6. `PatientInquiry` record is created with status `pending_verification`.\par
+\pard\li360\sa60\fs22\f0 7. All active staff users receive database notifications.\par
+\pard\li360\sa60\fs22\f0 8. Audit log entry is created.\par
+\pard\li360\sa60\fs22\f0 9. User is redirected back to home with a success flash message.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Mermaid sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\sa0\fs18\f1 sequenceDiagram\par
+\pard\sa0\fs18\f1     participant Visitor\par
+\pard\sa0\fs18\f1     participant HomePage\par
+\pard\sa0\fs18\f1     participant LandingInquiryController\par
+\pard\sa0\fs18\f1     participant PatientInquiry\par
+\pard\sa0\fs18\f1     participant Notification\par
+\pard\sa0\fs18\f1     participant AuditLog\par
+\pard\sa0\fs18\f1     participant StaffUsers\par
+\pard\sa0\fs18\f1 \par
+\pard\sa0\fs18\f1     Visitor->>HomePage: Submit inquiry form\par
+\pard\sa0\fs18\f1     HomePage->>LandingInquiryController: POST /inquiries\par
+\pard\sa0\fs18\f1     LandingInquiryController->>PatientInquiry: Create pending_verification inquiry\par
+\pard\sa0\fs18\f1     LandingInquiryController->>Notification: Create notification for each active staff user\par
+\pard\sa0\fs18\f1     Notification-->>StaffUsers: New inquiry appears in staff portal\par
+\pard\sa0\fs18\f1     LandingInquiryController->>AuditLog: Log inquiry submission\par
+\pard\sa0\fs18\f1     LandingInquiryController-->>HomePage: Redirect with success message\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.2 Inquiry conversion to registered patient flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Allows staff to verify landing-page submissions and convert them into full patient records and patient portal accounts.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Staff opens inquiry list.\par
+\pard\li360\sa60\fs22\f0 2. Staff opens conversion page for a specific inquiry.\par
+\pard\li360\sa60\fs22\f0 3. Staff submits verified patient details and optional temporary password.\par
+\pard\li360\sa60\fs22\f0 4. System finds or creates a `User` with role `patient`.\par
+\pard\li360\sa60\fs22\f0 5. System updates or creates the related `Patient`.\par
+\pard\li360\sa60\fs22\f0 6. Inquiry status becomes `converted`.\par
+\pard\li360\sa60\fs22\f0 7. Notifications for that inquiry are marked read.\par
+\pard\li360\sa60\fs22\f0 8. Audit log entry is created.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Output artifacts\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - `users` row\par
+\pard\li360\sa60\fs22\f0 - `patients` row\par
+\pard\li360\sa60\fs22\f0 - updated `patient_inquiries` row\par
+\pard\li360\sa60\fs22\f0 - `audit_logs` row\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.3 Patient self-booking flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Allows only logged-in patient users to book their own appointments.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Patient opens `/appointments/book`.\par
+\pard\li360\sa60\fs22\f0 2. System confirms authenticated role is `patient`.\par
+\pard\li360\sa60\fs22\f0 3. UI loads:\par
+\pard\sa120\fs22\f0 - active dentists\par
+\pard\sa120\fs22\f0 - clinic time slots\par
+\pard\sa120\fs22\f0 - available booking days\par
+\pard\sa120\fs22\f0 - existing non-cancelled appointments\par
+\pard\li360\sa60\fs22\f0 4. UI requests available times for a chosen dentist/date.\par
+\pard\li360\sa60\fs22\f0 5. Backend checks:\par
+\pard\sa120\fs22\f0 - dentist active state\par
+\pard\sa120\fs22\f0 - dentist schedule day\par
+\pard\sa120\fs22\f0 - slot conflict\par
+\pard\li360\sa60\fs22\f0 6. Patient submits booking form.\par
+\pard\li360\sa60\fs22\f0 7. Backend resolves or creates linked patient profile.\par
+\pard\li360\sa60\fs22\f0 8. Appointment is created with status `scheduled`.\par
+\pard\li360\sa60\fs22\f0 9. Audit log entry is created.\par
+\pard\li360\sa60\fs22\f0 10. User is redirected to confirmation page.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Mermaid sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\sa0\fs18\f1 sequenceDiagram\par
+\pard\sa0\fs18\f1     participant Patient\par
+\pard\sa0\fs18\f1     participant BookingUI\par
+\pard\sa0\fs18\f1     participant PatientAppointmentController\par
+\pard\sa0\fs18\f1     participant AppointmentAvailability\par
+\pard\sa0\fs18\f1     participant PatientModel\par
+\pard\sa0\fs18\f1     participant Appointment\par
+\pard\sa0\fs18\f1     participant AuditLog\par
+\pard\sa0\fs18\f1 \par
+\pard\sa0\fs18\f1     Patient->>BookingUI: Select dentist/date/time\par
+\pard\sa0\fs18\f1     BookingUI->>PatientAppointmentController: GET available times\par
+\pard\sa0\fs18\f1     PatientAppointmentController->>AppointmentAvailability: Validate dentist/day/slot\par
+\pard\sa0\fs18\f1     AppointmentAvailability-->>PatientAppointmentController: Available or blocked\par
+\pard\sa0\fs18\f1     Patient->>BookingUI: Submit booking\par
+\pard\sa0\fs18\f1     BookingUI->>PatientAppointmentController: POST store-public\par
+\pard\sa0\fs18\f1     PatientAppointmentController->>PatientModel: Find or create patient profile\par
+\pard\sa0\fs18\f1     PatientAppointmentController->>Appointment: Create scheduled appointment\par
+\pard\sa0\fs18\f1     PatientAppointmentController->>AuditLog: Log creation\par
+\pard\sa0\fs18\f1     PatientAppointmentController-->>BookingUI: Redirect to confirmation\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.4 Staff-managed appointment flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Allows staff to create, edit, remind, export, and cancel appointments for clinic operations.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Create appointment sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Staff selects patient, dentist, date, time, type.\par
+\pard\li360\sa60\fs22\f0 2. Controller validates the request.\par
+\pard\li360\sa60\fs22\f0 3. Availability is checked through `AppointmentAvailability`.\par
+\pard\li360\sa60\fs22\f0 4. Appointment is created with status `pending`.\par
+\pard\li360\sa60\fs22\f0 5. Email is sent to dentist.\par
+\pard\li360\sa60\fs22\f0 6. Optional email is sent to patient.\par
+\pard\li360\sa60\fs22\f0 7. In-app notification is created for dentist.\par
+\pard\li360\sa60\fs22\f0 8. In-app notification is created for patient.\par
+\pard\li360\sa60\fs22\f0 9. Audit log entry is created.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Reminder sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Staff triggers reminder.\par
+\pard\li360\sa60\fs22\f0 2. `SendAppointmentReminderJob::dispatchSync` runs immediately.\par
+\pard\li360\sa60\fs22\f0 3. Patient receives in-app notification.\par
+\pard\li360\sa60\fs22\f0 4. Audit log entry is created.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Update/cancel sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - update changes schedule details after conflict validation\par
+\pard\li360\sa60\fs22\f0 - cancel marks status as `cancelled`\par
+\pard\li360\sa60\fs22\f0 - exports generate PDF or Excel files\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.5 Dentist cancellation flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Lets a dentist cancel one of their own future appointments.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Dentist opens own appointment calendar.\par
+\pard\li360\sa60\fs22\f0 2. Dentist cancels a future appointment.\par
+\pard\li360\sa60\fs22\f0 3. System verifies the appointment belongs to that dentist.\par
+\pard\li360\sa60\fs22\f0 4. Appointment status becomes `cancelled`.\par
+\pard\li360\sa60\fs22\f0 5. Patient receives cancellation email.\par
+\pard\li360\sa60\fs22\f0 6. Patient receives in-app cancellation notification.\par
+\pard\li360\sa60\fs22\f0 7. All staff users receive in-app cancellation notifications.\par
+\pard\li360\sa60\fs22\f0 8. Audit log entry is created.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.6 Treatment record flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Lets dentists document clinical visits and attach supporting files.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Dentist chooses a patient from patients previously seen by that dentist.\par
+\pard\li360\sa60\fs22\f0 2. Dentist submits visit date, procedures, notes, prescription, and tooth data.\par
+\pard\li360\sa60\fs22\f0 3. System optionally links the treatment record to a same-day appointment.\par
+\pard\li360\sa60\fs22\f0 4. Treatment record is stored inside a database transaction.\par
+\pard\li360\sa60\fs22\f0 5. Uploaded files are stored on the `public` disk.\par
+\pard\li360\sa60\fs22\f0 6. Attachment metadata is saved in `treatment_record_attachments`.\par
+\pard\li360\sa60\fs22\f0 7. Audit log entry is created.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Data produced\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - treatment record row\par
+\pard\li360\sa60\fs22\f0 - zero or more attachment rows\par
+\pard\li360\sa60\fs22\f0 - files under `storage/app/public/treatment-records/...`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.7 Patient profile change request flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Separates direct profile edits from approval-required sensitive changes.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Direct fields\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - first name\par
+\pard\li360\sa60\fs22\f0 - last name\par
+\pard\li360\sa60\fs22\f0 - date of birth\par
+\pard\li360\sa60\fs22\f0 - gender\par
+\pard\li360\sa60\fs22\f0 - address\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Requested fields\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - email\par
+\pard\li360\sa60\fs22\f0 - phone\par
+\pard\li360\sa60\fs22\f0 - medical alerts\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Sequence for requested fields\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Patient submits a request with field/value.\par
+\pard\li360\sa60\fs22\f0 2. Backend validates allowed field and format.\par
+\pard\li360\sa60\fs22\f0 3. `ProfileChangeRequest` is created with status `pending`.\par
+\pard\li360\sa60\fs22\f0 4. Audit log entry is created.\par
+\pard\li360\sa60\fs22\f0 5. Request appears in patient history for tracking.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.8 Reporting and export flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Generates operational and analytical outputs for admin and staff.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Data sources\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - `appointments`\par
+\pard\li360\sa60\fs22\f0 - `patients`\par
+\pard\li360\sa60\fs22\f0 - `treatment_records`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Processing\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 `App\\Support\\ReportData` computes:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - appointments by day\par
+\pard\li360\sa60\fs22\f0 - daily summary\par
+\pard\li360\sa60\fs22\f0 - patient growth by month\par
+\pard\li360\sa60\fs22\f0 - procedure distribution\par
+\pard\li360\sa60\fs22\f0 - revenue estimate\par
+\pard\li360\sa60\fs22\f0 - appointments table\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Outputs\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - admin dashboard charts\par
+\pard\li360\sa60\fs22\f0 - admin reports page\par
+\pard\li360\sa60\fs22\f0 - staff reports page\par
+\pard\li360\sa60\fs22\f0 - PDF export\par
+\pard\li360\sa60\fs22\f0 - Excel export\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 8.9 Backup and restore flow\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Purpose\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Provides SQLite file-level backup management through the admin module.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Sequence\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. Admin creates backup.\par
+\pard\li360\sa60\fs22\f0 2. Database file `database/database.sqlite` is copied to `storage/app/backups`.\par
+\pard\li360\sa60\fs22\f0 3. Backup metadata is shown in backup UI.\par
+\pard\li360\sa60\fs22\f0 4. Admin can download, restore, or delete by validated filename pattern.\par
+\pard\li360\sa60\fs22\f0 5. All operations are audit logged.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 9. Cross-Cutting System Behaviors\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 9.1 Authentication and access control\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - Laravel auth routes handle login, registration, password reset, and email verification.\par
+\pard\li360\sa60\fs22\f0 - New self-registered users are created as `patient`.\par
+\pard\li360\sa60\fs22\f0 - `/dashboard` redirects authenticated users to the correct role dashboard.\par
+\pard\li360\sa60\fs22\f0 - `CheckRole` middleware gates route groups.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 9.2 Inertia shared state\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Every Inertia page can receive:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - authenticated user summary\par
+\pard\li360\sa60\fs22\f0 - unread notification count for dentist/staff/patient roles\par
+\pard\li360\sa60\fs22\f0 - flash messages\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 This is supplied by `HandleInertiaRequests`.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 9.3 Notifications\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Notifications are database records, not Laravel broadcast notifications.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Common notification types include:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - `patient_inquiry_submitted`\par
+\pard\li360\sa60\fs22\f0 - `appointment_booked`\par
+\pard\li360\sa60\fs22\f0 - `appointment_reminder`\par
+\pard\li360\sa60\fs22\f0 - `appointment_confirmed`\par
+\pard\li360\sa60\fs22\f0 - `appointment_cancelled`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 9.4 Audit logging\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 `AuditLog::log()` centralizes action logging with:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - user id\par
+\pard\li360\sa60\fs22\f0 - action\par
+\pard\li360\sa60\fs22\f0 - module\par
+\pard\li360\sa60\fs22\f0 - description\par
+\pard\li360\sa60\fs22\f0 - IP address\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 This supports accountability and admin review.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 9.5 Queue jobs and observers\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 `AppointmentObserver` is registered in `AppServiceProvider`.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Created appointment\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - schedules `SendAppointmentReminderJob` for 24 hours before the visit at 9:00 AM\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Updated appointment\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - if status changes to `confirmed`, dispatches `NotifyAppointmentConfirmedJob`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 This means some appointment side effects are asynchronous and depend on a running queue worker.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 9.6 Config-driven scheduling\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 `config/clinic.php` drives:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - clinic opening hours\par
+\pard\li360\sa60\fs22\f0 - slot interval\par
+\pard\li360\sa60\fs22\f0 - allowed treatment procedure list\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 `ClinicHelper::generateTimeSlots()` uses this config for booking UIs.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 10. Suggested Visuals For Documentation\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 These are the diagrams most worth building in your documentation set.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 10.1 System context diagram\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Show:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - Visitor\par
+\pard\li360\sa60\fs22\f0 - Patient\par
+\pard\li360\sa60\fs22\f0 - Staff\par
+\pard\li360\sa60\fs22\f0 - Dentist\par
+\pard\li360\sa60\fs22\f0 - Admin\par
+\pard\li360\sa60\fs22\f0 - Web app\par
+\pard\li360\sa60\fs22\f0 - Database\par
+\pard\li360\sa60\fs22\f0 - Mail service\par
+\pard\li360\sa60\fs22\f0 - Queue worker\par
+\pard\li360\sa60\fs22\f0 - File storage\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 10.2 Container diagram\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Show these runtime parts:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - React/Inertia frontend\par
+\pard\li360\sa60\fs22\f0 - Laravel web app\par
+\pard\li360\sa60\fs22\f0 - Eloquent models/database\par
+\pard\li360\sa60\fs22\f0 - queue jobs\par
+\pard\li360\sa60\fs22\f0 - mailables\par
+\pard\li360\sa60\fs22\f0 - filesystem storage for attachments/backups\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 10.3 Role-to-module matrix\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Visualize which role can access:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - dashboard\par
+\pard\li360\sa60\fs22\f0 - appointments\par
+\pard\li360\sa60\fs22\f0 - patients\par
+\pard\li360\sa60\fs22\f0 - treatment records\par
+\pard\li360\sa60\fs22\f0 - reports\par
+\pard\li360\sa60\fs22\f0 - notifications\par
+\pard\li360\sa60\fs22\f0 - settings\par
+\pard\li360\sa60\fs22\f0 - backups\par
+\pard\li360\sa60\fs22\f0 - user management\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 10.4 Entity relationship diagram\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Use the Mermaid ERD in section 6.2 as the starting point.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 10.5 Sequence diagrams\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Recommended sequences:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - landing inquiry to staff notification\par
+\pard\li360\sa60\fs22\f0 - inquiry conversion to patient account\par
+\pard\li360\sa60\fs22\f0 - patient self-booking\par
+\pard\li360\sa60\fs22\f0 - staff appointment creation\par
+\pard\li360\sa60\fs22\f0 - dentist cancellation\par
+\pard\li360\sa60\fs22\f0 - treatment record upload\par
+\pard\li360\sa60\fs22\f0 - backup creation and restore\par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 10.6 Data lifecycle diagram\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 A strong documentation visual would be:\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 `Visitor -> Inquiry -> Patient/User -> Appointment -> TreatmentRecord -> Export/Audit`\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 11. Folder-Level Documentation Notes\par
+\pard\sa120\fs22\f0 \par
+\pard\sa60\fs18\f1 Path    Purpose\par
+\pard\sa60\fs18\f1 `app/Http/Controllers`    Business actions per role/module\par
+\pard\sa60\fs18\f1 `app/Models`    Domain entities and relationships\par
+\pard\sa60\fs18\f1 `app/Jobs`    Async appointment side effects\par
+\pard\sa60\fs18\f1 `app/Mail`    Appointment email templates\par
+\pard\sa60\fs18\f1 `app/Support`    Availability rules, report building, settings helpers\par
+\pard\sa60\fs18\f1 `app/Observers`    Appointment lifecycle hooks\par
+\pard\sa60\fs18\f1 `resources/js/Pages`    Inertia React pages\par
+\pard\sa60\fs18\f1 `resources/js/Layouts`    Role-specific application shells\par
+\pard\sa60\fs18\f1 `resources/js/Components`    Reusable UI elements\par
+\pard\sa60\fs18\f1 `resources/views/pdf`    PDF export templates\par
+\pard\sa60\fs18\f1 `resources/views/emails`    Email Blade templates\par
+\pard\sa60\fs18\f1 `database/migrations`    Schema history\par
+\pard\sa60\fs18\f1 `database/seeders`    Seed/test bootstrap data\par
+\pard\sa60\fs18\f1 `tests/Feature`    Business-flow tests\par
+\pard\sa60\fs18\f1 `scripts`    maintenance, verification, testing helpers\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 12. Test Coverage Worth Mentioning In Docs\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 The current test suite already documents several business rules:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - landing inquiry creation and staff notification\par
+\pard\li360\sa60\fs22\f0 - inquiry conversion into patient account/record\par
+\pard\li360\sa60\fs22\f0 - patient self-booking access restrictions\par
+\pard\li360\sa60\fs22\f0 - appointment slot conflict prevention\par
+\pard\li360\sa60\fs22\f0 - staff appointment booking/reminder/cancellation\par
+\pard\li360\sa60\fs22\f0 - staff patient registration with duplicate-email handling\par
+\pard\li360\sa60\fs22\f0 - role-based notification management\par
+\pard\li360\sa60\fs22\f0 - user settings/profile preference updates\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 This is useful for a "validated behaviors" or "quality assurance" section in your documentation.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 13. Risks, Constraints, and Documentation Notes\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 - The backup flow is SQLite-file based, so the current backup documentation should describe SQLite deployment assumptions.\par
+\pard\li360\sa60\fs22\f0 - Notification delivery is database-based; real-time push/websocket behavior is not implemented in this codebase.\par
+\pard\li360\sa60\fs22\f0 - Reminder and confirmation automation rely on queue workers actually running.\par
+\pard\li360\sa60\fs22\f0 - Some feature availability is migration-sensitive:\par
+\pard\sa120\fs22\f0 - `patient_inquiries`\par
+\pard\sa120\fs22\f0 - `user_settings`\par
+\pard\li360\sa60\fs22\f0 - Reports currently estimate revenue with a fixed multiplier rather than a billing/invoice model.\par
+\pard\li360\sa60\fs22\f0 - There is no visible admin approval workflow yet for processing `ProfileChangeRequest`; the request capture exists, but approval handling is not exposed in the route map reviewed here.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 14. Documentation Boilerplate You Can Reuse\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 One-sentence system description\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 The Dental Clinic Management System is a role-based clinic operations platform that manages patient intake, appointments, treatment records, notifications, reporting, and administrative controls through a Laravel and React Inertia architecture.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Short architecture summary\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 The application uses Laravel as the backend application layer and React with Inertia.js as the frontend presentation layer. Business logic is organized by role-specific controllers, persisted through Eloquent models, and extended with queue jobs, email notifications, exports, audit logs, and file-based backup handling.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\b\fs24\f0 Short data flow summary\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 Most workflows begin with a user action in an Inertia React page, pass through a Laravel controller for validation and business rules, update one or more relational records, and then optionally trigger notifications, emails, queue jobs, exports, or audit log entries before returning an Inertia response or redirect.\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 \par
+\pard\sa140\b\fs28\f0 15. Recommended Documentation Set\par
+\pard\sa120\fs22\f0 \par
+\pard\sa120\fs22\f0 If your team is creating formal documentation, I would split it into these deliverables:\par
+\pard\sa120\fs22\f0 \par
+\pard\li360\sa60\fs22\f0 1. System overview\par
+\pard\li360\sa60\fs22\f0 2. Architecture and tech stack\par
+\pard\li360\sa60\fs22\f0 3. User roles and permissions\par
+\pard\li360\sa60\fs22\f0 4. Database/entity model\par
+\pard\li360\sa60\fs22\f0 5. Core business process flows\par
+\pard\li360\sa60\fs22\f0 6. UI/module walkthrough by role\par
+\pard\li360\sa60\fs22\f0 7. Reports, exports, and backups\par
+\pard\li360\sa60\fs22\f0 8. Deployment/runtime requirements\par
+\pard\li360\sa60\fs22\f0 9. Testing and quality assurance\par
+\pard\li360\sa60\fs22\f0 10. Known constraints and future improvements\par
+\pard\sa120\fs22\f0 \par
+}
+

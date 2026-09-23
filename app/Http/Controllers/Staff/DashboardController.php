@@ -35,10 +35,6 @@ class DashboardController extends Controller
         $todayCheckIns = $checkInQueue->count();
         $remainingCheckIns = $checkInQueue->where('status', '!=', 'confirmed')->count();
 
-        // Walk-ins (for demo)
-        $walkInCount = 3;
-        $waitingWalkIns = 1;
-
         // Reminders to send for tomorrow
         $remindersToSend = Appointment::where('appointment_date', $tomorrow)
             ->where('status', '!=', 'cancelled')
@@ -51,8 +47,6 @@ class DashboardController extends Controller
             'todayCheckIns' => $todayCheckIns,
             'remainingCheckIns' => $remainingCheckIns,
             'checkInQueue' => $checkInQueue,
-            'walkInCount' => $walkInCount,
-            'waitingWalkIns' => $waitingWalkIns,
             'remindersToSend' => $remindersToSend,
             'pendingInquiries' => $pendingInquiries,
         ]);

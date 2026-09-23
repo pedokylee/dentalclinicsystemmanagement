@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1100" viewBox="0 0 1800 1100" role="img" aria-labelledby="title desc">
+  <title id="title">Dental Clinic Management System - DFD Level 1</title>
+  <desc id="desc">Detailed data flow diagram showing appointment booking, patient check-in and scheduling, treatment recording, admin management, and reporting with data stores.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fbfd; }
+      .title { font: 700 32px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 16px 'Segoe UI', Arial, sans-serif; fill: #475569; }
+      .entity { fill: #ffffff; stroke: #2563eb; stroke-width: 2.2; rx: 12; ry: 12; }
+      .process { fill: #e6fffb; stroke: #0f766e; stroke-width: 2.8; rx: 20; ry: 20; }
+      .store { fill: #ffffff; stroke: #64748b; stroke-width: 2.2; }
+      .label { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .text { font: 13px 'Segoe UI', Arial, sans-serif; fill: #1f2937; }
+      .flow { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .data { font: 12px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1800" height="1100"/>
+  <text class="title" x="900" y="52" text-anchor="middle">Dental Clinic Management System</text>
+  <text class="subtitle" x="900" y="80" text-anchor="middle">Data Flow Diagram Level 1</text>
+
+  <rect class="entity" x="70" y="140" width="220" height="100"/>
+  <text class="label" x="180" y="190" text-anchor="middle">Public / Patient</text>
+
+  <rect class="entity" x="70" y="410" width="220" height="100"/>
+  <text class="label" x="180" y="460" text-anchor="middle">Staff</text>
+
+  <rect class="entity" x="1510" y="260" width="220" height="100"/>
+  <text class="label" x="1620" y="310" text-anchor="middle">Dentist</text>
+
+  <rect class="entity" x="1510" y="560" width="220" height="100"/>
+  <text class="label" x="1620" y="610" text-anchor="middle">Admin</text>
+
+  <rect class="process" x="390" y="120" width="360" height="120"/>
+  <text class="label" x="570" y="168" text-anchor="middle">1.0 Appointment Booking</text>
+  <text class="text" x="570" y="195" text-anchor="middle">Inquiry intake, self-booking,</text>
+  <text class="text" x="570" y="215" text-anchor="middle">patient resolution, slot validation</text>
+
+  <rect class="process" x="390" y="390" width="360" height="120"/>
+  <text class="label" x="570" y="438" text-anchor="middle">2.0 Patient Check-in and Scheduling</text>
+  <text class="text" x="570" y="465" text-anchor="middle">Registration, reminder sending,</text>
+  <text class="text" x="570" y="485" text-anchor="middle">appointment update, check-in workflow</text>
+
+  <rect class="process" x="980" y="220" width="360" height="120"/>
+  <text class="label" x="1160" y="268" text-anchor="middle">3.0 Treatment Recording</text>
+  <text class="text" x="1160" y="295" text-anchor="middle">Treatment notes, procedures,</text>
+  <text class="text" x="1160" y="315" text-anchor="middle">prescriptions, attachments</text>
+
+  <rect class="process" x="980" y="520" width="360" height="120"/>
+  <text class="label" x="1160" y="568" text-anchor="middle">4.0 Admin Management</text>
+  <text class="text" x="1160" y="595" text-anchor="middle">Users, settings, backups,</text>
+  <text class="text" x="1160" y="615" text-anchor="middle">system controls</text>
+
+  <rect class="process" x="685" y="760" width="430" height="120"/>
+  <text class="label" x="900" y="808" text-anchor="middle">5.0 Reporting and Audit Monitoring</text>
+  <text class="text" x="900" y="835" text-anchor="middle">Operational reporting, exports,</text>
+  <text class="text" x="900" y="855" text-anchor="middle">analytics, audit review</text>
+
+  <rect class="store" x="120" y="930" width="150" height="70"/><line x1="135" y1="930" x2="135" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="255" y1="930" x2="255" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="195" y="960" text-anchor="middle">D1 Users</text>
+  <rect class="store" x="300" y="930" width="150" height="70"/><line x1="315" y1="930" x2="315" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="435" y1="930" x2="435" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="375" y="960" text-anchor="middle">D2 Patients</text>
+  <rect class="store" x="480" y="930" width="150" height="70"/><line x1="495" y1="930" x2="495" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="615" y1="930" x2="615" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="555" y="960" text-anchor="middle">D3 Dentists</text>
+  <rect class="store" x="660" y="930" width="170" height="70"/><line x1="675" y1="930" x2="675" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="815" y1="930" x2="815" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="745" y="960" text-anchor="middle">D4 Appointments</text>
+  <rect class="store" x="860" y="930" width="190" height="70"/><line x1="875" y1="930" x2="875" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="1035" y1="930" x2="1035" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="955" y="960" text-anchor="middle">D5 Treatment Records</text>
+  <rect class="store" x="1080" y="930" width="190" height="70"/><line x1="1095" y1="930" x2="1095" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="1255" y1="930" x2="1255" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="1175" y="960" text-anchor="middle">D6 Attachments</text>
+  <rect class="store" x="1300" y="930" width="170" height="70"/><line x1="1315" y1="930" x2="1315" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="1455" y1="930" x2="1455" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="1385" y="960" text-anchor="middle">D7 Notifications</text>
+  <rect class="store" x="1500" y="930" width="170" height="70"/><line x1="1515" y1="930" x2="1515" y2="1000" stroke="#64748b" stroke-width="2.2"/><line x1="1655" y1="930" x2="1655" y2="1000" stroke="#64748b" stroke-width="2.2"/><text class="label" x="1585" y="960" text-anchor="middle">D8 Audit Logs</text>
+  <rect class="store" x="120" y="1015" width="190" height="60"/><line x1="135" y1="1015" x2="135" y2="1075" stroke="#64748b" stroke-width="2.2"/><line x1="295" y1="1015" x2="295" y2="1075" stroke="#64748b" stroke-width="2.2"/><text class="label" x="215" y="1050" text-anchor="middle">D9 Patient Inquiries</text>
+  <rect class="store" x="340" y="1015" width="190" height="60"/><line x1="355" y1="1015" x2="355" y2="1075" stroke="#64748b" stroke-width="2.2"/><line x1="515" y1="1015" x2="515" y2="1075" stroke="#64748b" stroke-width="2.2"/><text class="label" x="435" y="1050" text-anchor="middle">D10 User Settings</text>
+  <rect class="store" x="560" y="1015" width="210" height="60"/><line x1="575" y1="1015" x2="575" y2="1075" stroke="#64748b" stroke-width="2.2"/><line x1="755" y1="1015" x2="755" y2="1075" stroke="#64748b" stroke-width="2.2"/><text class="label" x="665" y="1050" text-anchor="middle">D11 System Settings</text>
+
+  <path class="flow" d="M290 180 L390 180"/><text class="data" x="340" y="166" text-anchor="middle">Booking request / inquiry data</text>
+  <path class="flow" d="M290 460 L390 460"/><text class="data" x="340" y="446" text-anchor="middle">Registration / schedule update</text>
+  <path class="flow" d="M1340 280 L1510 310"/><text class="data" x="1435" y="272" text-anchor="middle">Treatment input / record access</text>
+  <path class="flow" d="M1340 580 L1510 610"/><text class="data" x="1435" y="570" text-anchor="middle">Admin commands / report requests</text>
+  <path class="flow" d="M750 180 L980 280"/><text class="data" x="860" y="205" text-anchor="middle">Confirmed appointment context</text>
+  <path class="flow" d="M750 450 L980 580"/><text class="data" x="860" y="500" text-anchor="middle">Operational updates</text>
+  <path class="flow" d="M570 240 L570 930"/><text class="data" x="585" y="690">patient create / update</text>
+  <path class="flow" d="M650 510 L745 930"/><text class="data" x="685" y="740">appointment create / update</text>
+  <path class="flow" d="M1160 340 L955 930"/><text class="data" x="1085" y="655">treatment record write</text>
+  <path class="flow" d="M1200 340 L1175 930"/><text class="data" x="1210" y="655">attachment metadata</text>
+  <path class="flow" d="M1210 640 L665 1015"/><text class="data" x="920" y="860">system configuration</text>
+  <path class="flow" d="M1100 640 L435 1015"/><text class="data" x="815" y="900">user preferences / role settings</text>
+  <path class="flow" d="M590 240 L215 1015"/><text class="data" x="300" y="660">inquiry capture</text>
+  <path class="flow" d="M640 510 L1385 930"/><text class="data" x="1030" y="750">notifications</text>
+  <path class="flow" d="M1240 340 L1585 930"/><text class="data" x="1430" y="660">treatment audit</text>
+  <path class="flow" d="M1250 640 L1585 930"/><text class="data" x="1450" y="780">admin audit</text>
+  <path class="flow" d="M745 930 L900 880"/><path class="flow" d="M955 930 L930 880"/><path class="flow" d="M1585 930 L1000 880"/><path class="flow" d="M375 930 L840 880"/><text class="data" x="1070" y="900">report aggregation inputs</text>
+  <path class="flow" d="M1115 820 L1510 610"/><text class="data" x="1310" y="770" text-anchor="middle">reports / audit summaries</text>
+  <path class="flow" d="M1115 790 L1510 330"/><text class="data" x="1310" y="720" text-anchor="middle">patient history / schedule view</text>
+  <path class="flow" d="M685 790 L290 190"/><text class="data" x="470" y="520" text-anchor="middle">confirmation / notifications</text>
+</svg>

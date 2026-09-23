@@ -38,7 +38,7 @@ const NAV_ITEMS = {
         { label: 'Register Patient', href: '/staff/patients/create', icon: UserRound },
         { label: 'Book Appointment', href: '/staff/appointments/create', icon: CalendarDays },
         { label: 'Appointments', href: '/staff/appointments', icon: ClipboardList },
-        { label: 'Walk-in Check-in', href: '/staff/checkin', icon: Activity },
+        { label: 'Patient Check-in', href: '/staff/checkin', icon: Activity },
         { label: 'Reports', href: '/staff/reports', icon: FileBarChart2 },
         { label: 'Notifications', href: '/staff/notifications', icon: Bell },
         { label: 'User Settings', href: '/staff/profile', icon: Settings },

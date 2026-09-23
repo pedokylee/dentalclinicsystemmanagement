@@ -22,8 +22,8 @@ export default function CheckinIndex({ appointments }) {
     return (
         <div className="dcms-page">
             <div>
-                <h1 className="dcms-page-title">Walk-in Check-in</h1>
-                <p className="dcms-page-subtitle">Search the day&apos;s patients, review their appointment details, and mark them as checked in in real time.</p>
+                <h1 className="dcms-page-title">Patient Check-in</h1>
+                <p className="dcms-page-subtitle">Search today&apos;s appointments, review patient details, and mark arrivals as checked in in real time.</p>
             </div>
 
             <section className="dcms-card">

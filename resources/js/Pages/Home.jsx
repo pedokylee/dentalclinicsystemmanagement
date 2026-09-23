@@ -54,7 +54,7 @@ export default function Home() {
                         <div className="space-y-6">
                             <div className="space-y-4">
                                 <h1 className="text-6xl font-bold text-[#E2FAF7] leading-tight">
-                                    Your Smile,<br /><span className="text-[#0D9488]">Our Priority</span>
+                                    Our Priority,<br /><span className="text-[#0D9488]">Your Smile</span>
                                 </h1>
                                 <p className="text-xl text-[#7ABFB9]">
                                     Welcome to SmileCare Dental Clinic. We provide comprehensive dental care with modern technology and a compassionate team dedicated to your oral health.

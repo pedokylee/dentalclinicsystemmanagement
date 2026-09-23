@@ -1,9 +1,9 @@
 import StaffLayout from '@/Layouts/StaffLayout'
 import StatCard from '@/Components/StatCard'
 import { Link, router } from '@inertiajs/react'
-import { Bell, CalendarDays, ClipboardCheck, SearchCheck, UserPlus, Users } from 'lucide-react'
+import { Bell, CalendarDays, ClipboardCheck, SearchCheck, UserPlus } from 'lucide-react'
 
-export default function Dashboard({ todayCheckIns, checkInQueue, walkInCount, remindersToSend, pendingInquiries }) {
+export default function Dashboard({ todayCheckIns, remainingCheckIns, checkInQueue, remindersToSend, pendingInquiries }) {
     return (
         <div className="dcms-page">
             <div className="dcms-page-header">
@@ -50,7 +50,7 @@ export default function Dashboard({ todayCheckIns, checkInQueue, walkInCount, re
             <div className="grid gap-6 md:grid-cols-3">
                 <StatCard label="Today&apos;s Queue" value={checkInQueue.length} icon={<CalendarDays className="h-5 w-5" />} />
                 <StatCard label="Checked In" value={todayCheckIns} icon={<ClipboardCheck className="h-5 w-5" />} />
-                <StatCard label="Walk-ins" value={walkInCount} icon={<Users className="h-5 w-5" />} />
+                <StatCard label="Pending Check-ins" value={remainingCheckIns} icon={<ClipboardCheck className="h-5 w-5" />} />
             </div>
 
             <div className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
